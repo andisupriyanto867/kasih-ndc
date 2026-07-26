@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KASIH Instagram">
+<title>KASIH - ParagonCorp System</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Grand+Hotel&display=swap" rel="stylesheet">
+
+<!-- Firebase (compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+:root {
+  --ig-bg: #fafafa;
+  --ig-card-bg: #ffffff;
+  --ig-border: #dbdbdb;
+  --ig-text: #262626;
+  --ig-secondary-text: #8e8e8e;
+  --ig-blue: #0095f6;
+  --ig-blue-hover: #1877f2;
+  --ig-red: #ed4956;
+  --ig-green: #10b981;
+  
+  --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--ig-bg);
+  color: var(--ig-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  padding-bottom: 70px;
+}
+
+/* ─── HEADER ─── */
+.ig-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--ig-border);
+  padding: 10px 16px;
+}
+
+.header-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brand-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--ig-border);
+}
+
+.ig-logo {
+  font-family: 'Grand Hotel', cursive;
+  font-size: 26px;
+  color: var(--ig-text);
+  text-decoration: none;
+}
+
+/* ─── BOTTOM NAV ─── */
+.ig-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--ig-border);
+  z-index: 100;
+  padding: 10px 0;
+}
+
+.bottom-nav-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.nav-tab {
+  background: transparent;
+  border: none;
+  color: var(--ig-secondary-text);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.2s;
+}
+
+.nav-tab span { font-size: 9px; font-weight: 600; }
+.nav-tab.active { color: var(--ig-text); }
+
+/* ─── MAIN CONTENT ─── */
+.main-content {
+  flex: 1;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 0;
+}
+
+.page-section {
+  display: none;
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.page-section.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── STORIES CAROUSEL ─── */
+.stories-wrapper {
+  display: flex;
+  gap: 14px;
+  padding: 12px 16px 16px;
+  overflow-x: auto;
+  background: var(--ig-card-bg);
+  border-bottom: 1px solid var(--ig-border);
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+
+.stories-wrapper::-webkit-scrollbar { display: none; }
+
+.story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.story-ring {
+  width: 66px;
+  height: 66px;
+  border-radius: var(--radius-full);
+  padding: 2.5px;
+  background: var(--ig-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-ring.add-ring {
+  background: var(--ig-border);
+}
+
+.story-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  overflow: hidden;
+}
+
+.story-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-title {
+  font-size: 11px;
+  color: var(--ig-text);
+  font-weight: 600;
+  max-width: 66px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── EXPLORE GRID ─── */
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 0 4px;
+}
+
+.explore-item {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  background: #e2e8f0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.explore-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.explore-item:hover img { transform: scale(1.05); }
+
+.explore-overlay {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 1px 4px rgba(0,0,0,0.8);
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  backdrop-filter: blur(2px);
+}
+
+/* ─── FORM LIGHT ─── */
+.ig-form-card {
+  background: var(--ig-card-bg);
+  border: 1px solid var(--ig-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin: 0 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ig-form-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ig-text);
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--ig-border);
+  padding-bottom: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ig-secondary-text);
+  text-transform: uppercase;
+}
+
+.ig-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: #f8fafc;
+  border: 1px solid var(--ig-border);
+  border-radius: var(--radius-sm);
+  color: var(--ig-text);
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.ig-input:focus {
+  outline: none;
+  border-color: var(--ig-blue);
+  background: #ffffff;
+}
+
+.ig-input[readonly] { background: #e2e8f0; color: var(--ig-secondary-text); }
+textarea.ig-input { resize: vertical; min-height: 80px; }
+
+/* ─── UPLOAD BOX LIGHT ─── */
+.ig-photo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.ig-photo-box {
+  background: #f8fafc;
+  border: 1px dashed var(--ig-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  text-align: center;
+  position: relative;
+}
+
+.ig-photo-box.before { border-color: rgba(237, 73, 86, 0.4); }
+.ig-photo-box.after { border-color: rgba(16, 185, 129, 0.4); }
+
+.ig-dropzone { cursor: pointer; display: block; }
+.ig-dropzone input { display: none; }
+
+.ig-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-sm);
+  background: #e2e8f0;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.ig-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.btn-del-img {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.ig-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  color: white;
+}
+
+.ig-btn-primary { background: var(--ig-blue); }
+.ig-btn-primary:hover { background: var(--ig-blue-hover); }
+.ig-btn-gradient { background: var(--ig-gradient); }
+
+/* ─── MODAL DETAIL POSTINGAN & KOMENTAR ─── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  padding: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-card {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.post-detail-media {
+  width: 100%;
+  background: #000;
+  max-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
+}
+
+.post-detail-media img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: contain;
+}
+
+.comments-container {
+  padding: 12px 16px;
+  border-top: 1px solid #efefef;
+  background: #fff;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.comment-item {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ig-text);
+  word-break: break-word;
+}
+
+.comment-user { font-weight: 800; margin-right: 6px; }
+
+.comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #efefef;
+  padding-top: 10px;
+}
+
+.comment-input-user {
+  width: 85px;
+  padding: 7px;
+  font-size: 11px;
+  border: 1px solid var(--ig-border);
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+}
+
+.comment-input-text {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 12px;
+  border: 1px solid var(--ig-border);
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+}
+
+.comment-btn-submit {
+  background: transparent;
+  border: none;
+  color: var(--ig-blue);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ─── FULLSCREEN OVERLAY DENGAN TOMBOL DOWNLOAD ─── */
+.fullscreen-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.fullscreen-overlay.active { display: flex; }
+
+.fullscreen-img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.fullscreen-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-download-fs {
+  background: var(--ig-blue);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fullscreen-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#exportCanvas { display: none; }
+</style>
+</head>
+<body>
+
+<canvas id="exportCanvas"></canvas>
+
+<!-- ─── HEADER (TOMBOL PLUS & PENCARIAN ATAS KANAN SUDAH DIHAPUS) ─── -->
+<header class="ig-header">
+  <div class="header-container">
+    <a href="#" class="brand-wrapper" onclick="tampilkanForm('menuUtama'); return false;">
+      <img src="https://i.supaimg.com/2c2fe634-0778-4567-93bf-17d826ecd3d2/da06317c-66aa-4cb4-9dfc-8e3510274c4a.jpg" alt="Paragon Logo" class="brand-logo-img">
+      <span class="ig-logo">KASIH</span>
+    </a>
+  </div>
+</header>
+
+<!-- ─── MAIN CONTENT ─── -->
+<main class="main-content">
+
+  <!-- ══ DASHBOARD (BERANDA) ══ -->
+  <section id="menuUtama" class="page-section active">
+    
+    <!-- STORIES CAROUSEL -->
+    <div class="stories-wrapper" id="storiesContainer">
+      <div class="story-item" onclick="openGenerateJpg()">
+        <div class="story-ring add-ring"><div class="story-avatar">➕</div></div>
+        <div class="story-title">Tambah</div>
+      </div>
+    </div>
+
+    <!-- CARD UTAMA KAIZEN SYSTEM -->
+    <div style="padding: 0 12px;">
+      <div style="background:#fff; border:1px solid var(--ig-border); border-radius:var(--radius-md); padding:28px 18px; text-align:center; margin-top:8px;">
+        <img src="https://i.supaimg.com/2c2fe634-0778-4567-93bf-17d826ecd3d2/da06317c-66aa-4cb4-9dfc-8e3510274c4a.jpg" alt="Paragon Logo" style="height:52px; object-fit:contain; margin-bottom:12px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: var(--ig-text); margin-bottom: 6px;">Kaizen System KASIH</h2>
+        <p style="font-size: 12px; color: var(--ig-secondary-text); max-width: 320px; margin: 0 auto; line-height: 1.5;">
+          Platform digitalisasi laporan perbaikan Kaizen. Terintegrasi dengan Realtime Database & Auto Update.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FORM 1: INPUT LAPORAN FOTO ══ -->
+  <section id="formGeneratePdf" class="page-section">
+    <div class="ig-form-card">
+      <div class="ig-form-title">🖼️ Buat Laporan Kaizen</div>
+
+      <div class="form-group">
+        <label>Nama Pelaksana</label>
+        <input type="text" id="nama" class="ig-input" placeholder="Nama pelaksana...">
+      </div>
+      <div class="form-group">
+        <label>Judul Kaizen / Improvement</label>
+        <input type="text" id="dept" class="ig-input" placeholder="Contoh: Perbaikan Rak A">
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="form-group">
+          <label>Area / ZTJ</label>
+          <input type="text" id="area" class="ig-input" placeholder="Area A.1a">
+        </div>
+        <div class="form-group">
+          <label>Week (ISO)</label>
+          <input type="number" id="week" class="ig-input" readonly>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Pelaksanaan</label>
+        <input type="date" id="tanggal" class="ig-input">
+      </div>
+
+      <div class="ig-photo-grid">
+        <div class="ig-photo-box before">
+          <label class="ig-dropzone" for="fotoSebelum">
+            <span style="font-size:11px; font-weight:700; color:var(--ig-red);">🔴 BEFORE</span>
+            <div class="ig-preview" id="pre-sebelum">
+              <span style="font-size:10px; color:var(--ig-secondary-text);">Upload Foto</span>
+              <button type="button" class="btn-del-img" id="btn-del-before" onclick="clearImage('fotoSebelum', 'pre-sebelum', 'btn-del-before')">✕</button>
+            </div>
+            <input type="file" id="fotoSebelum" accept="image/*" onchange="previewImg(this, 'pre-sebelum', 'btn-del-before')">
+          </label>
+        </div>
+
+        <div class="ig-photo-box after">
+          <label class="ig-dropzone" for="fotoSesudah">
+            <span style="font-size:11px; font-weight:700; color:var(--ig-green);">🟢 AFTER</span>
+            <div class="ig-preview" id="pre-sesudah">
+              <span style="font-size:10px; color:var(--ig-secondary-text);">Upload Foto</span>
+              <button type="button" class="btn-del-img" id="btn-del-after" onclick="clearImage('fotoSesudah', 'pre-sesudah', 'btn-del-after')">✕</button>
+            </div>
+            <input type="file" id="fotoSesudah" accept="image/*" onchange="previewImg(this, 'pre-sesudah', 'btn-del-after')">
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Penjelasan Kondisi Sebelum</label>
+        <textarea id="deskripsi" class="ig-input" placeholder="Uraikan kondisi sebelum..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Penjelasan Kondisi Setelah</label>
+        <textarea id="perbaikan" class="ig-input" placeholder="Uraikan hasil perbaikan..."></textarea>
+      </div>
+
+      <button class="ig-btn ig-btn-gradient" id="btnGenerateJpg" onclick="simpanLaporanLengkap()">
+        🚀 Simpan Laporan
+      </button>
+    </div>
+  </section>
+
+  <!-- ══ FORM 2: UPLOAD DIRECT ══ -->
+  <section id="formUploadDirect" class="page-section">
+    <div class="ig-form-card">
+      <div class="ig-form-title">☁️ Upload Direct</div>
+
+      <div class="form-group">
+        <label>Nama Pelaksana</label>
+        <input type="text" id="u_nama" class="ig-input" placeholder="Nama pelaksana...">
+      </div>
+      <div class="form-group">
+        <label>ZTJ / Area</label>
+        <input type="text" id="u_area" class="ig-input" placeholder="Area kerja...">
+      </div>
+      <div class="form-group">
+        <label>Week (ISO)</label>
+        <input type="number" id="u_week" class="ig-input" readonly>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>File Dokumen / Foto Direct</label>
+        <label class="ig-photo-box" for="u_file" style="display:block; padding: 20px; cursor:pointer;">
+          <div style="font-size: 24px;">📎</div>
+          <div style="font-size: 11px; color: var(--ig-blue); font-weight:700; margin-top:6px;">Pilih PDF / Gambar</div>
+          <div id="u_file_name" style="font-size: 11px; color: var(--ig-green); margin-top: 4px;"></div>
+          <input type="file" id="u_file" accept=".pdf,image/*" onchange="showFileName()" style="display:none;">
+        </label>
+      </div>
+
+      <button class="ig-btn ig-btn-primary" id="btnUploadSimpan" onclick="simpanUpload()">
+        ✈️ Direct Upload Ke Server
+      </button>
+    </div>
+  </section>
+
+  <!-- ══ EXPLORE GRID FEED PAGE ══ -->
+  <section id="formData" class="page-section">
+    <div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 80px; gap: 8px; margin-bottom: 12px; padding: 0 12px;">
+        <input type="text" id="f_nama" class="ig-input" placeholder="🔍 Nama..." oninput="renderDataExplore()">
+        <input type="text" id="f_area" class="ig-input" placeholder="📍 Area..." oninput="renderDataExplore()">
+        <input type="number" id="f_week" class="ig-input" placeholder="Wk" oninput="renderDataExplore()">
+      </div>
+
+      <div class="explore-grid" id="exploreGrid"></div>
+
+      <div id="dataEmpty" style="text-align: center; padding: 40px; color: var(--ig-secondary-text); display: none;">
+        Belum ada postingan foto.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── BOTTOM NAV ─── -->
+<nav class="ig-bottom-nav">
+  <div class="bottom-nav-container">
+    <button class="nav-tab active" id="nav-home" onclick="tampilkanForm('menuUtama')">
+      <div>🏠</div><span>Home</span>
+    </button>
+    <button class="nav-tab" id="nav-input" onclick="openUploadDirect()">
+      <div>➕</div><span>Posting</span>
+    </button>
+    <button class="nav-tab" id="nav-data" onclick="tampilkanForm('formData'); muatDataExplore();">
+      <div>🔍</div><span>Explore</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ─── MODAL DETAIL POSTINGAN ─── -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    <div class="modal-body" id="modalDetailContent"></div>
+  </div>
+</div>
+
+<!-- ─── MODAL FULLSCREEN PREVIEW + TOMBOL DOWNLOAD ─── -->
+<div class="fullscreen-overlay" id="fullscreenModal">
+  <button class="fullscreen-close" onclick="closeFullscreenModal()">✕</button>
+  <img id="fullscreenImg" class="fullscreen-img" src="" alt="Fullscreen Preview">
+  <div class="fullscreen-actions">
+    <a id="btnDownloadImg" class="btn-download-fs" download="Laporan_Kaizen.jpg" href="#">
+      📥 Download Foto
+    </a>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyC0UbwMpV6B4ncM1zlw8MygToCb3M-Ryyw",
+  authDomain: "input-pallet.firebaseapp.com",
+  databaseURL: "https://input-pallet-default-rtdb.firebaseio.com",
+  projectId: "input-pallet",
+  storageBucket: "input-pallet.firebasestorage.app",
+  messagingSenderId: "529883155847",
+  appId: "1:529883155847:web:aac65642a3e317f0279722",
+  measurementId: "G-426NS04MX3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+firebase.auth().signInAnonymously().catch(err => console.warn("Auth anonim:", err));
+
+// DYNAMIC COLOR GENERATOR UNTUK MENGHASILKAN WARNA CERAH BERBEDA-BEDA PADA SETIAP OPERATOR
+function getOperatorColor(name) {
+  if (!name) return '#0095f6';
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [
+    '#e11d48', '#d97706', '#2563eb', '#059669', '#7c3aed', 
+    '#c026d3', '#0284c7', '#d946ef', '#16a34a', '#ea580c'
+  ];
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function isiWeekOtomatis() {
+  const wk = getWeekNumber(new Date());
+  const today = new Date().toISOString().split('T')[0];
+  const weekInput = document.getElementById('week');
+  const uWeekInput = document.getElementById('u_week');
+  const tanggalInput = document.getElementById('tanggal');
+  
+  if (weekInput) weekInput.value = wk;
+  if (uWeekInput) uWeekInput.value = wk;
+  if (tanggalInput && !tanggalInput.value) tanggalInput.value = today;
+}
+
+// AUTO UPDATE REALTIME REALTIME LISTENER
+document.addEventListener('DOMContentLoaded', () => {
+  isiWeekOtomatis();
+  muatStories();
+  muatDataExplore();
+});
+
+function tampilkanForm(id) {
+  document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+
+  if(id === 'menuUtama') document.getElementById('nav-home')?.classList.add('active');
+  else if(id === 'formUploadDirect') document.getElementById('nav-input')?.classList.add('active');
+  else if(id === 'formData') document.getElementById('nav-data')?.classList.add('active');
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openGenerateJpg() {
+  tampilkanForm('formGeneratePdf');
+}
+
+function openUploadDirect() {
+  tampilkanForm('formUploadDirect');
+}
+
+function previewImg(input, targetId, deleteBtnId) {
+  const preview = document.getElementById(targetId);
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { 
+      preview.innerHTML = `<img src="${e.target.result}"><button type="button" class="btn-del-img" id="${deleteBtnId}" onclick="clearImage('${input.id}', '${targetId}', '${deleteBtnId}')">✕</button>`; 
+      document.getElementById(deleteBtnId).style.display = 'flex';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function clearImage(inputId, targetId, deleteBtnId) {
+  document.getElementById(inputId).value = "";
+  const preview = document.getElementById(targetId);
+  preview.innerHTML = `<span style="font-size:10px; color:var(--ig-secondary-text);">Upload Foto</span><button type="button" class="btn-del-img" id="${deleteBtnId}">✕</button>`;
+}
+
+function showFileName() {
+  const f = document.getElementById('u_file');
+  document.getElementById('u_file_name').textContent = f.files[0] ? '✓ ' + f.files[0].name : '';
+}
+
+function compressImageToBase64(file, maxDim = 1280, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const ratio = Math.min(1, maxDim / Math.max(width, height));
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+      };
+      img.onerror = () => reject(new Error('Gagal membaca gambar'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToBase64Raw(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function simpanUpload() {
+  const nama = document.getElementById('u_nama').value.trim();
+  const area = document.getElementById('u_area').value.trim();
+  const week = document.getElementById('u_week').value;
+  const fileInput = document.getElementById('u_file');
+
+  if (!nama || !week || fileInput.files.length === 0) {
+    alert("Isi Nama, Week dan pilih File!");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const btn = document.getElementById("btnUploadSimpan");
+  btn.innerHTML = '⏳ Memposting...';
+  btn.disabled = true;
+
+  try {
+    let base64, mimeType;
+    if (file.type.startsWith('image/')) {
+      const compressed = await compressImageToBase64(file, 1280, 0.8);
+      base64 = compressed.base64;
+      mimeType = compressed.mimeType;
+    } else {
+      base64 = await fileToBase64Raw(file);
+      mimeType = file.type || 'application/pdf';
+    }
+
+    const payload = {
+      nama, area, week: Number(week),
+      fileName: file.name,
+      mimeType,
+      fileData: base64,
+      tanggal: new Date().toISOString(),
+      timestamp: Date.now()
+    };
+
+    const newEntryRef = db.ref('laporan').push();
+    await newEntryRef.set(payload);
+
+    alert("✅ Direct Upload Berhasil!");
+    document.getElementById('u_nama').value = "";
+    document.getElementById('u_area').value = "";
+    document.getElementById('u_file').value = "";
+    document.getElementById('u_file_name').textContent = "";
+    isiWeekOtomatis();
+    tampilkanForm('menuUtama');
+  } catch (err) {
+    alert("Gagal posting: " + err.message);
+  }
+
+  btn.innerHTML = '✈️ Direct Upload Ke Server';
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════
+// 1. STORIES (BULAT) - REALTIME UPDATE
+// ═══════════════════════════════════════
+function muatStories() {
+  db.ref('laporan').orderByChild('timestamp').limitToLast(10).on('value', snapshot => {
+    let list10 = [];
+    snapshot.forEach(child => {
+      list10.push({ id: child.key, ...child.val() });
+    });
+    list10.reverse();
+
+    const storiesContainer = document.getElementById('storiesContainer');
+    let storiesHTML = `
+      <div class="story-item" onclick="openGenerateJpg()">
+        <div class="story-ring add-ring"><div class="story-avatar">➕</div></div>
+        <div class="story-title">Tambah</div>
+      </div>`;
+
+    list10.forEach(item => {
+      const dataUri = item.fileData ? `data:${item.mimeType};base64,${item.fileData}` : '#';
+      const isImage = item.mimeType && item.mimeType.startsWith('image/');
+      
+      storiesHTML += `
+        <div class="story-item" onclick="openDetailModal('${item.id}')">
+          <div class="story-ring">
+            <div class="story-avatar">
+              ${isImage ? `<img src="${dataUri}">` : '📄'}
+            </div>
+          </div>
+          <div class="story-title">${item.nama || 'Laporan'}</div>
+        </div>`;
+    });
+
+    if (storiesContainer) storiesContainer.innerHTML = storiesHTML;
+  });
+}
+
+// ═══════════════════════════════════════
+// 2. EXPLORE GRID - UNLIMITED & REALTIME AUTO UPDATE
+// ═══════════════════════════════════════
+let semuaLaporanExplore = [];
+
+function muatDataExplore() {
+  db.ref('laporan').orderByChild('timestamp').on('value', snapshot => {
+    semuaLaporanExplore = [];
+    snapshot.forEach(child => {
+      semuaLaporanExplore.push({ id: child.key, ...child.val() });
+    });
+    semuaLaporanExplore.reverse();
+    renderDataExplore();
+  });
+}
+
+function renderDataExplore() {
+  const container = document.getElementById('exploreGrid');
+  const empty = document.getElementById('dataEmpty');
+  const fNama = (document.getElementById('f_nama')?.value || '').toLowerCase();
+  const fArea = (document.getElementById('f_area')?.value || '').toLowerCase();
+  const fWeek = document.getElementById('f_week')?.value;
+
+  const filtered = semuaLaporanExplore.filter(item => {
+    const matchNama = !fNama || (item.nama || '').toLowerCase().includes(fNama);
+    const matchArea = !fArea || (item.area || '').toLowerCase().includes(fArea);
+    const matchWeek = !fWeek || String(item.week) === String(fWeek);
+    return matchNama && matchArea && matchWeek;
+  });
+
+  if (!container) return;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  container.innerHTML = filtered.map(item => {
+    const isImage = item.mimeType && item.mimeType.startsWith('image/');
+    const dataUri = item.fileData ? `data:${item.mimeType};base64,${item.fileData}` : '#';
+    const opColor = getOperatorColor(item.nama);
+
+    return `
+      <div class="explore-item" onclick="openDetailModal('${item.id}')">
+        ${isImage ? `<img src="${dataUri}">` : '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#cbd5e1; font-size:24px;">📄</div>'}
+        <div class="explore-overlay">
+          <span style="color: ${opColor};">📷 ${item.nama || 'Pelaksana'}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// MODAL DETAIL POSTINGAN
+// ═══════════════════════════════════════
+function openDetailModal(id) {
+  const item = semuaLaporanExplore.find(x => x.id === id);
+  if (!item) return;
+
+  const modal = document.getElementById('detailModal');
+  const content = document.getElementById('modalDetailContent');
+  const isImage = item.mimeType && item.mimeType.startsWith('image/');
+  const dataUri = item.fileData ? `data:${item.mimeType};base64,${item.fileData}` : '#';
+  const tgl = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-';
+  const userInitial = (item.nama || 'A')[0].toUpperCase();
+  const opColor = getOperatorColor(item.nama);
+
+  let commentsHTML = '';
+  if (item.comments) {
+    commentsHTML = Object.values(item.comments).map(c => {
+      const cColor = getOperatorColor(c.user);
+      return `
+        <div class="comment-item">
+          <span class="comment-user" style="color: ${cColor};">${c.user}:</span>${c.text}
+        </div>`;
+    }).join('');
+  }
+
+  content.innerHTML = `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #efefef;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:32px; height:32px; border-radius:50%; background:var(--ig-gradient); padding:2px;">
+          <div style="width:100%; height:100%; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:${opColor};">${userInitial}</div>
+        </div>
+        <div>
+          <div style="font-weight:800; font-size:13px; color:${opColor};">${item.nama || 'Pelaksana'}</div>
+          <div style="font-size:10px; color:var(--ig-secondary-text);">Area ${item.area || '-'} • Week ${item.week ?? '-'}</div>
+        </div>
+      </div>
+      <button onclick="hapusLaporan('${item.id}')" style="background:none; border:none; color:var(--ig-red); font-size:12px; cursor:pointer;">🗑️ Hapus</button>
+    </div>
+
+    <div class="post-detail-media" onclick="openFullscreenModal('${dataUri}', '${item.nama}')">
+      ${isImage ? `<img src="${dataUri}" title="Klik untuk Perbesar">` : `<div style="padding:40px; color:#fff;">📄 ${item.fileName || 'Dokumen'}</div>`}
+    </div>
+
+    <div style="padding:12px 16px;">
+      <div style="font-size:13px; margin-bottom:4px;">
+        <span style="font-weight:800; margin-right:6px; color:${opColor};">${item.nama || 'Pelaksana'}</span>
+        ${item.judul ? `<b>${item.judul}</b> - ` : ''} Laporan Kaizen Week ${item.week ?? '-'}.
+      </div>
+      <div style="font-size:10px; color:var(--ig-secondary-text); text-transform:uppercase;">${tgl}</div>
+    </div>
+
+    <div class="comments-container">
+      <div class="comments-list" id="modal-comments-${item.id}">
+        ${commentsHTML || '<div style="font-size:11px; color:var(--ig-secondary-text);">Belum ada komentar...</div>'}
+      </div>
+      <form class="comment-form" onsubmit="tambahKomentar(event, '${item.id}')">
+        <input type="text" class="comment-input-user" id="c-user-${item.id}" placeholder="Nama..." required>
+        <input type="text" class="comment-input-text" id="c-text-${item.id}" placeholder="Tulis komentar..." required>
+        <button type="submit" class="comment-btn-submit">Kirim</button>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('active');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('active');
+}
+
+// BUKA FULLSCREEN & AKTIFKAN FITUR DOWNLOAD FOTO
+function openFullscreenModal(imgSrc, operatorName) {
+  if (!imgSrc || imgSrc === '#') return;
+  const fsModal = document.getElementById('fullscreenModal');
+  const fsImg = document.getElementById('fullscreenImg');
+  const downloadBtn = document.getElementById('btnDownloadImg');
+  
+  fsImg.src = imgSrc;
+  downloadBtn.href = imgSrc;
+  downloadBtn.download = `Laporan_Kaizen_${(operatorName || 'Foto').replace(/\s/g, '_')}.jpg`;
+  
+  fsModal.classList.add('active');
+}
+
+function closeFullscreenModal() {
+  document.getElementById('fullscreenModal').classList.remove('active');
+}
+
+async function tambahKomentar(e, postId) {
+  e.preventDefault();
+  const userInput = document.getElementById(`c-user-${postId}`);
+  const textInput = document.getElementById(`c-text-${postId}`);
+  
+  const user = userInput.value.trim();
+  const text = textInput.value.trim();
+
+  if (!user || !text) return;
+
+  try {
+    await db.ref(`laporan/${postId}/comments`).push({
+      user,
+      text,
+      timestamp: Date.now()
+    });
+    textInput.value = '';
+    
+    const commentList = document.getElementById(`modal-comments-${postId}`);
+    const cColor = getOperatorColor(user);
+    const newCommentNode = document.createElement('div');
+    newCommentNode.className = 'comment-item';
+    newCommentNode.innerHTML = `<span class="comment-user" style="color:${cColor};">${user}:</span>${text}`;
+    commentList.appendChild(newCommentNode);
+  } catch (err) {
+    alert("Gagal mengirim komentar: " + err.message);
+  }
+}
+
+async function hapusLaporan(id) {
+  if (confirm("Hapus postingan ini dari Server?")) {
+    try {
+      await db.ref('laporan/' + id).remove();
+      closeDetailModal();
+    } catch (err) {
+      alert("Gagal menghapus: " + err.message);
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// EXPORT CANVAS JPG & PROSES SIMPAN
+// ═══════════════════════════════════════
+const LOGO_URL = "https://i.supaimg.com/2c2fe634-0778-4567-93bf-17d826ecd3d2/da06317c-66aa-4cb4-9dfc-8e3510274c4a.jpg";
+let cachedLogoImg = null;
+
+function loadLogoImage() {
+  return new Promise(resolve => {
+    if (cachedLogoImg) { resolve(cachedLogoImg); return; }
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => { cachedLogoImg = img; resolve(img); };
+    img.onerror = () => resolve(null);
+    img.src = LOGO_URL;
+  });
+}
+
+function breakOversizedWord(ctx, word, maxWidth) {
+  if (ctx.measureText(word).width <= maxWidth) return [word];
+  const chunks = [];
+  let chunk = '';
+  for (const ch of word) {
+    const test = chunk + ch;
+    if (ctx.measureText(test).width > maxWidth && chunk) {
+      chunks.push(chunk);
+      chunk = ch;
+    } else {
+      chunk = test;
+    }
+  }
+  if (chunk) chunks.push(chunk);
+  return chunks;
+}
+
+function getWrappedLines(ctx, text, font, maxWidth) {
+  ctx.font = font;
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (ctx.measureText(word).width > maxWidth) {
+      if (line) { lines.push(line); line = ''; }
+      const pieces = breakOversizedWord(ctx, word, maxWidth);
+      pieces.forEach((piece, idx) => {
+        if (idx < pieces.length - 1) {
+          lines.push(piece);
+        } else {
+          line = piece;
+        }
+      });
+      continue;
+    }
+    const testLine = line ? line + ' ' + word : word;
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function fitTitleBlock(ctx, text, maxWidth, maxHeight, maxLines, maxFont, minFont) {
+  for (let size = maxFont; size >= minFont; size -= 2) {
+    const font = `bold ${size}px Arial`;
+    const lines = getWrappedLines(ctx, text, font, maxWidth);
+    const lineHeight = size * 1.18;
+    if (lines.length <= maxLines && lines.length * lineHeight <= maxHeight) {
+      return { font, size, lines, lineHeight };
+    }
+  }
+  const font = `bold ${minFont}px Arial`;
+  let lines = getWrappedLines(ctx, text, font, maxWidth);
+  const lineHeight = minFont * 1.18;
+  if (lines.length > maxLines) {
+    lines = lines.slice(0, maxLines);
+    ctx.font = font;
+    let last = lines[maxLines - 1];
+    while (ctx.measureText(last + '…').width > maxWidth && last.length > 1) {
+      last = last.slice(0, -1);
+    }
+    lines[maxLines - 1] = last + '…';
+  }
+  return { font, size: minFont, lines, lineHeight };
+}
+
+async function simpanLaporanLengkap() {
+  const nama      = document.getElementById('nama').value.trim()    || "-";
+  const dept      = document.getElementById('dept').value.trim()    || "-";
+  const area      = document.getElementById('area').value.trim()    || "-";
+  const tanggal   = document.getElementById('tanggal').value || "-";
+  const week      = document.getElementById('week').value    || "-";
+  const desBefore = document.getElementById('deskripsi').value.trim() || "-";
+  const desAfter  = document.getElementById('perbaikan').value.trim()  || "-";
+
+  if (nama === "-" || dept === "-") {
+    alert("Harap isi Nama Pelaksana dan Judul Kaizen!");
+    return;
+  }
+
+  const btn = document.getElementById("btnGenerateJpg");
+  btn.innerHTML = '⏳ Menyimpan Laporan...';
+  btn.disabled = true;
+
+  const W = 2480, H = 1754;
+  const canvas = document.getElementById('exportCanvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const C = { white: '#ffffff', dark: '#0f172a', red: '#dc2626', green: '#16a34a' };
+
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(16, 16, W-32, H-32);
+
+  const hdrH = 260;
+  const rightBlockW = 420;
+  const brandColW = 260;
+  const leftBlockW = W - 32 - rightBlockW;
+  const titleColX = 16 + brandColW;
+  const titleColW = leftBlockW - brandColW;
+
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(16, 16, brandColW, hdrH);
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(16, 16, brandColW, hdrH);
+
+  const brandSplitY = 16 + hdrH * 0.62;
+  ctx.beginPath();
+  ctx.moveTo(16, brandSplitY);
+  ctx.lineTo(16 + brandColW, brandSplitY);
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Rendering Logo ParagonCorp
+  const logoW = brandColW - 40, logoH = (brandSplitY - 16) - 20;
+  const logoX = 16 + 20;
+  const logoY = 16 + 10;
+  const logoImg = await loadLogoImage();
+  
+  if (logoImg) {
+    const ratio = Math.min(logoW / logoImg.width, logoH / logoImg.height);
+    const iw = logoImg.width * ratio;
+    const ih = logoImg.height * ratio;
+    const ix = logoX + (logoW - iw) / 2;
+    const iy = logoY + (logoH - ih) / 2;
+    try {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(logoImg, ix, iy, iw, ih);
+    } catch (e) {}
+  }
+
+  ctx.fillStyle = C.dark;
+  ctx.font = 'bold 26px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('LAPORAN KASIH', 16 + brandColW / 2, brandSplitY + (16 + hdrH - brandSplitY) / 2);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(titleColX, 16, titleColW, hdrH);
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(titleColX, 16, titleColW, hdrH);
+
+  const titlePad = 40;
+  const titleMaxWidth = titleColW - titlePad * 2;
+  const titleZoneH = hdrH - titlePad * 2;
+
+  const fit = fitTitleBlock(ctx, dept, titleMaxWidth, titleZoneH, 3, 64, 22);
+  ctx.fillStyle = C.dark;
+  ctx.font = fit.font;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const blockH = fit.lines.length * fit.lineHeight;
+  let ly = 16 + hdrH / 2 - blockH / 2 + fit.lineHeight / 2;
+  fit.lines.forEach(line => {
+    ctx.fillText(line, titleColX + titleColW / 2, ly);
+    ly += fit.lineHeight;
+  });
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  const rightBlockX = W - 16 - rightBlockW;
+  const infoRowH = hdrH / 4;
+  const infoLabels = [
+    ['Disusun', nama], ['Tanggal', tanggal], ['Area', area], ['Week', week],
+  ];
+  infoLabels.forEach(([label, value], i) => {
+    const ry = 16 + i * infoRowH;
+    ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#f1f5f9';
+    ctx.fillRect(rightBlockX, ry, rightBlockW, infoRowH);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(rightBlockX, ry, rightBlockW, infoRowH);
+    
+    if (i === 0) {
+      ctx.fillStyle = getOperatorColor(nama);
+    } else {
+      ctx.fillStyle = C.dark;
+    }
+    
+    ctx.font = 'bold 22px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, rightBlockX + rightBlockW / 2, ry + infoRowH * 0.32);
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText(value, rightBlockX + rightBlockW / 2, ry + infoRowH * 0.68);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  });
+
+  const colHdrY = 16 + hdrH;
+  const colHdrH = 80;
+  const halfW = (W - 32) / 2;
+
+  ctx.fillStyle = C.red;
+  ctx.fillRect(16, colHdrY, halfW, colHdrH);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 42px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('KONDISI SEBELUM KASIH', 16 + halfW / 2, colHdrY + colHdrH / 2);
+
+  ctx.fillStyle = C.green;
+  ctx.fillRect(16 + halfW, colHdrY, halfW, colHdrH);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('KONDISI SETELAH KASIH', 16 + halfW + halfW / 2, colHdrY + colHdrH / 2);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  const photoY = colHdrY + colHdrH;
+  const descH = 220;
+  const photoH = H - 16 - photoY - descH;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(16, photoY, halfW, photoH);
+  ctx.fillRect(16 + halfW, photoY, halfW, photoH);
+
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(16, photoY, halfW, photoH);
+  ctx.strokeRect(16 + halfW, photoY, halfW, photoH);
+
+  const pad = 20;
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(16 + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+  ctx.strokeRect(16 + halfW + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+
+  await drawPhotoOnCanvas(ctx, 'fotoSebelum', 16 + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+  await drawPhotoOnCanvas(ctx, 'fotoSesudah', 16 + halfW + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+
+  const descY = photoY + photoH;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(16, descY, halfW, descH);
+  ctx.fillRect(16 + halfW, descY, halfW, descH);
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(16, descY, halfW, descH);
+  ctx.strokeRect(16 + halfW, descY, halfW, descH);
+
+  ctx.fillStyle = C.dark;
+  ctx.font = 'bold 32px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText('Penjelasan Kondisi Sebelum:', 40, descY + 45);
+  ctx.fillText('Penjelasan Kondisi Setelah:', 40 + halfW, descY + 45);
+
+  ctx.fillStyle = C.dark;
+  ctx.font = '30px Arial';
+  wrapText(ctx, desBefore, 40, descY + 90, halfW - 70, 42);
+  wrapText(ctx, desAfter, 40 + halfW, descY + 90, halfW - 70, 42);
+
+  const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.98);
+  const base64Foto = jpgDataUrl.split(',')[1];
+
+  const payload = {
+    nama, area, week: Number(week),
+    judul: dept,
+    deskripsiSebelum: desBefore,
+    deskripsiSetelah: desAfter,
+    fileName: `Laporan_Kaizen_Week_${week}_${nama.replace(/\s/g,'_')}.jpg`,
+    mimeType: 'image/jpeg',
+    fileData: base64Foto,
+    tanggal: tanggal || new Date().toISOString(),
+    timestamp: Date.now()
+  };
+
+  try {
+    const newEntryRef = db.ref('laporan').push();
+    await newEntryRef.set(payload);
+
+    alert("✅ Laporan Berhasil Disimpan!");
+    
+    document.getElementById('nama').value = "";
+    document.getElementById('dept').value = "";
+    document.getElementById('area').value = "";
+    document.getElementById('deskripsi').value = "";
+    document.getElementById('perbaikan').value = "";
+    clearImage('fotoSebelum', 'pre-sebelum', 'btn-del-before');
+    clearImage('fotoSesudah', 'pre-sesudah', 'btn-del-after');
+    isiWeekOtomatis();
+
+    tampilkanForm('menuUtama');
+  } catch (err) {
+    alert("Gagal menyimpan laporan: " + err.message);
+  }
+
+  btn.innerHTML = '🚀 Simpan Laporan';
+  btn.disabled = false;
+}
+
+function drawPhotoOnCanvas(ctx, inputId, x, y, maxW, maxH) {
+  return new Promise(resolve => {
+    const file = document.getElementById(inputId).files[0];
+    if (!file) {
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(x, y, maxW, maxH);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 44px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('[ BELUM ADA FOTO ]', x + maxW / 2, y + maxH / 2);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      resolve();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(maxW / img.width, maxH / img.height);
+        const w = img.width * ratio;
+        const h = img.height * ratio;
+        const ox = x + (maxW - w) / 2;
+        const oy = y + (maxH - h) / 2;
+        ctx.drawImage(img, ox, oy, w, h);
+        resolve();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let cy = y;
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && i > 0) {
+      ctx.fillText(line, x, cy);
+      line = words[i] + ' ';
+      cy += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, cy);
+}
+</script>
+
+</body>
+</html>
