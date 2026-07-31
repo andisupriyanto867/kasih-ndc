@@ -1,0 +1,2757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#050a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KASIH System">
+<title>KASIH - ParagonCorp System</title>
+
+<!-- SCRIPT INISIALISASI TEMA PALING UTAMA SEBELUM DOM/CSS DIRENDER -->
+<script>
+  (function() {
+    const savedTheme = localStorage.getItem('kasih_active_theme') || 'theme-light';
+    document.documentElement.className = savedTheme;
+  })();
+</script>
+
+<!-- Google Fonts Melimpah -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Grand+Hotel&family=Poppins:wght@400;600;800&family=Roboto:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Open+Sans:wght@400;600;700&family=Montserrat:wght@400;600;800&family=Dancing+Script:wght@600;700&family=Fira+Code:wght@400;600&family=Cinzel:wght@600;800&family=Bebas+Neue&family=Pacifico&family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@0,600;1,400&family=Fredoka:wght@400;600&family=Press+Start+2P&family=Caveat:wght@600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+<!-- Dynamic PWA Web App Manifest -->
+<script>
+  const manifestData = {
+    name: "KASIH - ParagonCorp System",
+    short_name: "KASIH System",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#050a14",
+    theme_color: "#6366f1",
+    description: "Platform digitalisasi laporan perbaikan Kaizen ParagonCorp.",
+    icons: [
+      {
+        src: "https://res.cloudinary.com/vf5nikiz/image/upload/v1785164146/IMG_20260707_085722_slsyiz.jpg",
+        sizes: "192x192",
+        type: "image/jpeg"
+      },
+      {
+        src: "https://res.cloudinary.com/vf5nikiz/image/upload/v1785164146/IMG_20260707_085722_slsyiz.jpg",
+        sizes: "512x512",
+        type: "image/jpeg"
+      }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+  const manifestURL = URL.createObjectURL(manifestBlob);
+  const linkManifest = document.createElement('link');
+  linkManifest.rel = 'manifest';
+  linkManifest.href = manifestURL;
+  document.head.appendChild(linkManifest);
+</script>
+
+<!-- Firebase (compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+:root {
+  --font-global: 'Plus Jakarta Sans', sans-serif;
+  --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --grad-card: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.9) 100%);
+  --grad-btn: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #d946ef 100%);
+  
+  --ig-bg: #f1f5f9;
+  --ig-card-bg: #ffffff;
+  --ig-border: #e2e8f0;
+  --ig-text: #0f172a;
+  --ig-secondary-text: #64748b;
+  --ig-blue: #3b82f6;
+  --ig-red: #ef4444;
+  --ig-green: #10b981;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  --shadow-glow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── KANVAS LATAR ANIMASI BERGERAK ─── */
+#theme-bg-canvas {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* ─── TEMA DEFINISI DARK ─── */
+html.theme-ps5, body.theme-ps5 {
+  --grad-primary: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 50%, #0072ce 100%);
+  --grad-surface: rgba(18, 24, 36, 0.85); --grad-card: rgba(22, 27, 34, 0.85);
+  --grad-btn: linear-gradient(90deg, #0052cc 0%, #00d4ff 100%);
+  --ig-bg: #050a14; --ig-card-bg: rgba(18, 24, 36, 0.85); --ig-border: #1f293d; --ig-text: #f0f6fc; --ig-secondary-text: #8b949e;
+  background: #050a14;
+}
+
+html.theme-ps4, body.theme-ps4 {
+  --grad-primary: linear-gradient(135deg, #00439c 0%, #0072ce 50%, #2e6db4 100%);
+  --grad-surface: rgba(10, 25, 47, 0.85); --grad-card: rgba(15, 32, 59, 0.85);
+  --grad-btn: linear-gradient(90deg, #00439c 0%, #00d4ff 100%);
+  --ig-bg: #030d1a; --ig-card-bg: rgba(15, 32, 59, 0.85); --ig-border: #1e3a5f; --ig-text: #ffffff; --ig-secondary-text: #93c5fd;
+  background: #030d1a;
+}
+
+html.theme-cyberpunk, body.theme-cyberpunk {
+  --grad-primary: linear-gradient(135deg, #fcee0a 0%, #ff0055 50%, #00f0ff 100%);
+  --grad-surface: rgba(26, 16, 37, 0.88); --grad-card: rgba(26, 16, 37, 0.88);
+  --grad-btn: linear-gradient(90deg, #ff0055 0%, #00f0ff 100%);
+  --ig-bg: #09050d; --ig-card-bg: rgba(21, 12, 30, 0.9); --ig-border: #3d1259; --ig-text: #00f0ff; --ig-secondary-text: #ff0055;
+  background: #09050d;
+}
+
+html.theme-neon, body.theme-neon {
+  --grad-primary: linear-gradient(135deg, #00ff87 0%, #60efff 100%);
+  --grad-surface: rgba(9, 26, 24, 0.88); --grad-card: rgba(9, 26, 24, 0.88);
+  --grad-btn: linear-gradient(90deg, #00b894 0%, #00cec9 100%);
+  --ig-bg: #020b0a; --ig-card-bg: rgba(9, 26, 24, 0.9); --ig-border: #133e38; --ig-text: #e0fbf6; --ig-secondary-text: #55ead4;
+  background: #020b0a;
+}
+
+html.theme-sunset, body.theme-sunset {
+  --grad-primary: linear-gradient(135deg, #ff512f 0%, #dd2476 100%);
+  --grad-surface: rgba(33, 11, 26, 0.88); --grad-card: rgba(33, 11, 26, 0.88);
+  --grad-btn: linear-gradient(90deg, #ff512f 0%, #f09819 100%);
+  --ig-bg: #140710; --ig-card-bg: rgba(33, 11, 26, 0.9); --ig-border: #421835; --ig-text: #ffd5ec; --ig-secondary-text: #ff85c0;
+  background: #140710;
+}
+
+html.theme-emerald, body.theme-emerald {
+  --grad-primary: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --grad-surface: rgba(8, 33, 28, 0.88); --grad-card: rgba(8, 33, 28, 0.88);
+  --grad-btn: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+  --ig-bg: #03120f; --ig-card-bg: rgba(8, 33, 28, 0.9); --ig-border: #134238; --ig-text: #d1fae5; --ig-secondary-text: #34d399;
+  background: #03120f;
+}
+
+html.theme-dracula, body.theme-dracula {
+  --grad-primary: linear-gradient(135deg, #bd93f9 0%, #ff79c6 100%);
+  --grad-surface: rgba(40, 42, 54, 0.9); --grad-card: rgba(40, 42, 54, 0.9);
+  --grad-btn: linear-gradient(90deg, #bd93f9 0%, #ff79c6 100%);
+  --ig-bg: #1e1f29; --ig-card-bg: rgba(40, 42, 54, 0.9); --ig-border: #44475a; --ig-text: #f8f8f2; --ig-secondary-text: #8be9fd;
+  background: #1e1f29;
+}
+
+html.theme-midnight, body.theme-midnight {
+  --grad-primary: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+  --grad-surface: rgba(15, 23, 42, 0.88); --grad-card: rgba(15, 23, 42, 0.88);
+  --grad-btn: linear-gradient(90deg, #312e81 0%, #4338ca 100%);
+  --ig-bg: #020617; --ig-card-bg: rgba(15, 23, 42, 0.9); --ig-border: #1e293b; --ig-text: #f1f5f9; --ig-secondary-text: #818cf8;
+  background: #020617;
+}
+
+html.theme-gold, body.theme-gold {
+  --grad-primary: linear-gradient(135deg, #ffe066 0%, #f59e0b 100%);
+  --grad-surface: rgba(28, 25, 23, 0.88); --grad-card: rgba(28, 25, 23, 0.88);
+  --grad-btn: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+  --ig-bg: #0c0a09; --ig-card-bg: rgba(28, 25, 23, 0.9); --ig-border: #44403c; --ig-text: #fef08a; --ig-secondary-text: #fbbf24;
+  background: #0c0a09;
+}
+
+html.theme-retrogaming, body.theme-retrogaming {
+  --grad-primary: linear-gradient(135deg, #ff0055 0%, #7600ec 100%);
+  --grad-surface: rgba(18, 0, 36, 0.9); --grad-card: rgba(18, 0, 36, 0.9);
+  --grad-btn: linear-gradient(90deg, #ff0055 0%, #ff5500 100%);
+  --ig-bg: #05000a; --ig-card-bg: rgba(18, 0, 36, 0.9); --ig-border: #330066; --ig-text: #33ff00; --ig-secondary-text: #ff00cc;
+  background: #05000a;
+}
+
+/* ─── TEMA DEFINISI LIGHT ─── */
+html.theme-light, body.theme-light {
+  --grad-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --grad-card: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(241,245,249,0.95) 100%);
+  --grad-btn: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #d946ef 100%);
+  --ig-bg: #f1f5f9; --ig-card-bg: #ffffff; --ig-border: #e2e8f0; --ig-text: #0f172a; --ig-secondary-text: #64748b;
+  background: var(--ig-bg);
+}
+
+html.theme-bright-pastel, body.theme-bright-pastel {
+  --grad-primary: linear-gradient(135deg, #f472b6 0%, #fb7185 50%, #c084fc 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #fdf2f8 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #ec4899 0%, #f43f5e 100%);
+  --ig-bg: #fff1f2; --ig-card-bg: #ffffff; --ig-border: #fecdd3; --ig-text: #881337; --ig-secondary-text: #9f1239;
+  background: var(--ig-bg);
+}
+
+html.theme-fresh-citrus, body.theme-fresh-citrus {
+  --grad-primary: linear-gradient(135deg, #f59e0b 0%, #eab308 50%, #84cc16 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #fefce8 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #d97706 0%, #ca8a04 100%);
+  --ig-bg: #fefef2; --ig-card-bg: #ffffff; --ig-border: #fef08a; --ig-text: #713f12; --ig-secondary-text: #854d0e;
+  background: var(--ig-bg);
+}
+
+html.theme-nordic-clean, body.theme-nordic-clean {
+  --grad-primary: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #0284c7 0%, #4f46e5 100%);
+  --ig-bg: #f0f9ff; --ig-card-bg: #ffffff; --ig-border: #bae6fd; --ig-text: #0c4a6e; --ig-secondary-text: #0369a1;
+  background: var(--ig-bg);
+}
+
+html.theme-soft-mint, body.theme-soft-mint {
+  --grad-primary: linear-gradient(135deg, #34d399 0%, #2dd4bf 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #059669 0%, #0d9488 100%);
+  --ig-bg: #f0fdf4; --ig-card-bg: #ffffff; --ig-border: #bbf7d0; --ig-text: #064e3b; --ig-secondary-text: #047857;
+  background: var(--ig-bg);
+}
+
+html.theme-rose-gold, body.theme-rose-gold {
+  --grad-primary: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #e11d48 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #fff1f2 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #e11d48 0%, #be123c 100%);
+  --ig-bg: #fff5f5; --ig-card-bg: #ffffff; --ig-border: #ffe4e6; --ig-text: #4c0519; --ig-secondary-text: #9f1239;
+  background: var(--ig-bg);
+}
+
+html.theme-ocean-breeze, body.theme-ocean-breeze {
+  --grad-primary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #ecfeff 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #0891b2 0%, #2563eb 100%);
+  --ig-bg: #ecfeff; --ig-card-bg: #ffffff; --ig-border: #a5f3fc; --ig-text: #164e63; --ig-secondary-text: #155e75;
+  background: var(--ig-bg);
+}
+
+html.theme-lavender-field, body.theme-lavender-field {
+  --grad-primary: linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #faf5ff 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #7e22ce 0%, #6d28d9 100%);
+  --ig-bg: #faf5ff; --ig-card-bg: #ffffff; --ig-border: #e9d5ff; --ig-text: #3b0764; --ig-secondary-text: #6b21a8;
+  background: var(--ig-bg);
+}
+
+html.theme-warm-cappuccino, body.theme-warm-cappuccino {
+  --grad-primary: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --grad-surface: linear-gradient(145deg, #ffffff 0%, #fffbeb 100%);
+  --grad-card: rgba(255, 255, 255, 0.95);
+  --grad-btn: linear-gradient(90deg, #92400e 0%, #78350f 100%);
+  --ig-bg: #fffbeb; --ig-card-bg: #ffffff; --ig-border: #fef3c7; --ig-text: #451a03; --ig-secondary-text: #78350f;
+  background: var(--ig-bg);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--font-global);
+  background: var(--ig-bg);
+  color: var(--ig-text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  font-size: 13px; padding-bottom: 80px;
+  transition: background 0.5s ease, color 0.3s ease;
+}
+
+/* ─── ANIMASI KEYFRAMES ─── */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(236, 72, 153, 0.7); }
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@keyframes pulseGreen { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } }
+
+/* ─── LOADING SCREEN MENYESUAIKAN TEMA AKTIF (TETAP ADA) ─── */
+#app-init-loader {
+  position: fixed; inset: 0; background: var(--ig-bg); z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+#app-init-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.spinner-ring {
+  width: 44px; height: 44px; border: 4px solid var(--ig-border); border-top: 4px solid #a855f7; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+
+.mini-spinner {
+  width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3); border-top: 3px solid #ffffff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
+}
+
+/* ─── BANNER CONTAINER ─── */
+.announcement-container {
+  width: 100%; margin-top: 24px; display: none; flex-direction: column; gap: 16px;
+}
+
+.announcement-card {
+  width: 100%; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid var(--ig-border); background: var(--ig-card-bg); display: flex; flex-direction: column; position: relative;
+}
+
+.announcement-media-wrapper {
+  width: 100%; position: relative; background: var(--ig-bg); cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+.announcement-card img, .announcement-card video {
+  width: 100%; height: auto; max-height: 480px; object-fit: contain; background: var(--ig-bg); display: block;
+}
+
+.announcement-text-box {
+  width: 100%; padding: 12px 16px; background: var(--grad-surface); color: var(--ig-text); font-weight: 700; font-size: 13px; border-top: 1px solid var(--ig-border); display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+
+/* KONTROL BANNER RAPI (SPEED, LIKE) */
+.banner-controls-bar {
+  width: 100%; padding: 10px 16px; background: var(--ig-card-bg); border-top: 1px solid var(--ig-border); display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px;
+}
+
+.banner-speed-select {
+  background: var(--ig-bg); border: 1px solid var(--ig-border); color: var(--ig-text); padding: 6px 10px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 800; cursor: pointer; outline: none;
+}
+
+/* ─── CUSTOM ALERT MODAL ─── */
+.custom-alert-overlay {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); z-index: 10005;
+  display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.25s ease;
+}
+.custom-alert-overlay.active { opacity: 1; visibility: visible; }
+
+.custom-alert-card {
+  background: var(--ig-card-bg); color: var(--ig-text); border: 1px solid var(--ig-border); border-radius: var(--radius-lg); padding: 24px 22px; text-align: center; max-width: 360px; width: 90%; box-shadow: var(--shadow-lg); transform: scale(0.9); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.custom-alert-overlay.active .custom-alert-card { transform: scale(1); }
+
+.alert-icon-wrapper {
+  width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 12px auto; background: rgba(99, 102, 241, 0.12); color: #6366f1;
+}
+.alert-icon-wrapper.danger { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+
+.custom-alert-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+.custom-alert-message { font-size: 12px; color: var(--ig-secondary-text); line-height: 1.5; margin-bottom: 20px; word-break: break-word; }
+
+.alert-btn-group { display: flex; gap: 10px; justify-content: center; }
+
+.alert-btn {
+  flex: 1; padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 800; font-size: 12px; border: none; cursor: pointer; transition: opacity 0.2s;
+}
+.alert-btn-cancel { background: var(--ig-bg); color: var(--ig-text); border: 1px solid var(--ig-border); }
+.alert-btn-confirm { background: var(--grad-btn); color: #fff; }
+.alert-btn-danger { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); color: #fff; }
+
+/* ─── ANIMATED CHECKMARK SUCCESS MODAL ─── */
+.success-modal-overlay {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 10000;
+  display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+}
+.success-modal-overlay.active { opacity: 1; visibility: visible; }
+
+.success-modal-card {
+  background: var(--ig-card-bg); color: var(--ig-text); border: 1px solid var(--ig-border); border-radius: var(--radius-lg); padding: 32px 28px; text-align: center; max-width: 320px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.25); transform: scale(0.85); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.success-modal-overlay.active .success-modal-card { transform: scale(1); }
+
+.checkmark-svg {
+  width: 76px; height: 76px; border-radius: 50%; display: block; stroke-width: 3; stroke: #10b981; stroke-miterlimit: 10; margin: 0 auto 16px auto; box-shadow: inset 0px 0px 0px #10b981; animation: fillCircle 0.4s ease-in-out 0.4s forwards, scaleCheck 0.3s ease-in-out 0.9s both;
+}
+
+.checkmark-circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 3; stroke-miterlimit: 10; stroke: #10b981; fill: none; animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+.checkmark-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: strokeCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards; }
+
+@keyframes strokeCircle { 100% { stroke-dashoffset: 0; } }
+@keyframes strokeCheck { 100% { stroke-dashoffset: 0; } }
+@keyframes fillCircle { 100% { box-shadow: inset 0px 0px 0px 40px rgba(16, 185, 129, 0.12); } }
+@keyframes scaleCheck { 0%, 100% { transform: none; } 50% { transform: scale3d(1.12, 1.12, 1); } }
+
+/* ─── HEADER ─── */
+.ig-header {
+  background: var(--ig-card-bg); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--ig-border); padding: 12px 24px; box-shadow: var(--shadow-sm); width: 100%;
+}
+
+.header-container { width: 100%; max-width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.brand-wrapper { display: flex; align-items: center; gap: 12px; text-decoration: none; transition: transform 0.2s ease; }
+.brand-wrapper:hover { transform: scale(1.02); }
+
+.brand-logo-img {
+  height: 36px; width: auto; object-fit: contain; background: #ffffff; padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid var(--ig-border); box-shadow: var(--shadow-sm);
+}
+
+.ig-logo {
+  font-family: 'Grand Hotel', cursive; font-size: 30px; background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;
+}
+
+.header-clock-box {
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center; background: var(--ig-bg); border: 1px solid var(--ig-border); padding: 4px 14px; border-radius: var(--radius-md); box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.header-clock-time {
+  font-family: 'Grand Hotel', cursive; font-size: 24px; font-weight: bold; background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;
+}
+
+.header-clock-date {
+  font-family: 'Grand Hotel', cursive; font-size: 13px; font-weight: bold; background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin-top: 1px;
+}
+
+.btn-pwa-install {
+  display: none; align-items: center; gap: 6px; background: var(--grad-btn); color: #ffffff; border: none; padding: 8px 14px; border-radius: var(--radius-full); font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: var(--shadow-glow); transition: transform 0.2s ease;
+}
+.btn-pwa-install:hover { transform: scale(1.05); }
+
+.floating-pwa-btn {
+  position: fixed; bottom: 85px; right: 18px; z-index: 99; background: var(--grad-btn); color: white; border: none; padding: 10px 18px; border-radius: var(--radius-full); font-weight: 800; font-size: 12px; box-shadow: var(--shadow-glow); display: none; align-items: center; gap: 8px; cursor: pointer; animation: pulseGlow 2.5s infinite;
+}
+
+/* ─── BOTTOM NAV ─── */
+.ig-bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; background: var(--ig-card-bg); backdrop-filter: blur(16px); border-top: 1px solid var(--ig-border); z-index: 100; padding: 8px 16px;
+}
+
+.bottom-nav-container { width: 100%; max-width: 900px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; }
+
+.nav-tab {
+  background: transparent; border: none; color: var(--ig-secondary-text); font-size: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); padding: 6px 16px; border-radius: var(--radius-md);
+}
+
+.nav-tab span { font-size: 10px; font-weight: 700; }
+.nav-tab:hover { color: #8b5cf6; transform: translateY(-2px); }
+.nav-tab.active { background: var(--grad-primary); color: #ffffff; transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+
+/* ─── MAIN CONTENT ─── */
+.main-content { flex: 1; width: 100%; max-width: 100%; margin: 0 auto; padding: 20px 24px; }
+.page-section { display: none; animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.page-section.active { display: block; }
+
+/* ─── REELS BUBBLE STICKY KETIKA SCROLL ─── */
+.sticky-stories-container {
+  position: sticky; top: 61px; z-index: 90; background: var(--ig-bg); padding-top: 4px; padding-bottom: 4px; margin-bottom: 20px;
+}
+
+.stories-wrapper {
+  display: flex; gap: 16px; padding: 14px 16px; background: var(--ig-card-bg); border-radius: var(--radius-lg); border: 1px solid var(--ig-border); scrollbar-width: none; box-shadow: var(--shadow-sm); width: 100%; overflow-x: auto;
+}
+
+.stories-wrapper::-webkit-scrollbar { display: none; }
+
+.story-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.story-item:hover { transform: scale(1.08); }
+
+.story-ring {
+  width: 70px; height: 70px; border-radius: var(--radius-full); padding: 3px; background: var(--grad-primary); animation: pulseGlow 3s infinite; display: flex; align-items: center; justify-content: center;
+}
+.story-ring.add-ring { background: var(--ig-border); animation: none; }
+
+.story-avatar {
+  width: 100%; height: 100%; border-radius: var(--radius-full); background: var(--ig-card-bg); border: 2px solid var(--ig-card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden;
+}
+.story-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.story-title { font-size: 11px; color: var(--ig-text); font-weight: 700; max-width: 70px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ─── EXPLORE GRID RESPONSIVE ─── */
+.explore-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 640px) { .explore-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+@media (min-width: 1024px) { .explore-grid { grid-template-columns: repeat(5, 1fr); gap: 18px; } }
+@media (min-width: 1400px) { .explore-grid { grid-template-columns: repeat(6, 1fr); gap: 20px; } }
+
+.explore-item {
+  position: relative; width: 100%; padding-top: 100%; background: var(--ig-border); border-radius: var(--radius-md); cursor: pointer; overflow: hidden; box-shadow: var(--shadow-sm); transition: all 0.3s ease;
+}
+.explore-item:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-lg); }
+.explore-item img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.explore-overlay {
+  position: absolute; bottom: 8px; left: 8px; right: 8px; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; pointer-events: none; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.stats-badges { display: flex; align-items: center; gap: 8px; color: #ffffff; font-size: 10px; pointer-events: auto; }
+
+.btn-like {
+  background: transparent; border: none; color: var(--ig-red); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 18px; font-weight: 800; transition: transform 0.15s ease;
+}
+.btn-like:active { animation: heartPop 0.3s ease-in-out; }
+
+/* ─── FORM & ADMIN CARD BOX ─── */
+.ig-form-card {
+  background: var(--grad-surface); border: 1px solid var(--ig-border); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-lg); width: 100%; max-width: 1000px; margin: 0 auto; backdrop-filter: blur(12px);
+}
+
+.ig-form-title {
+  font-size: 18px; font-weight: 800; background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; border-bottom: 2px solid var(--ig-border); padding-bottom: 12px;
+}
+
+/* HUB MENU PENGATURAN ADMIN */
+.settings-menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 10px; }
+
+.settings-menu-item {
+  background: var(--ig-card-bg); border: 1px solid var(--ig-border); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all 0.25s ease; box-shadow: var(--shadow-sm);
+}
+
+.settings-menu-item:hover { transform: translateY(-3px); border-color: #a855f7; box-shadow: var(--shadow-lg); }
+
+.settings-menu-icon {
+  width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--grad-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+
+.settings-menu-title { font-size: 14px; font-weight: 800; color: var(--ig-text); margin-bottom: 4px; }
+.settings-menu-desc { font-size: 11px; color: var(--ig-secondary-text); line-height: 1.4; }
+
+/* SUB-PENGATURAN PANEL */
+.settings-detail-panel { display: none; animation: fadeInScale 0.25s ease-out; }
+.settings-detail-panel.active { display: block; }
+
+.btn-back-settings {
+  display: inline-flex; align-items: center; gap: 8px; background: var(--ig-bg); border: 1px solid var(--ig-border); color: var(--ig-text); padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 20px; transition: background 0.2s;
+}
+.btn-back-settings:hover { background: var(--ig-border); }
+
+.admin-card-section {
+  background: var(--ig-card-bg); border: 1px solid var(--ig-border); border-radius: var(--radius-md); padding: 22px; margin-bottom: 20px; box-shadow: var(--shadow-sm);
+}
+
+.admin-card-header {
+  display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; color: var(--ig-text); margin-bottom: 16px; border-bottom: 1px solid var(--ig-border); padding-bottom: 10px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-group label { font-size: 11px; font-weight: 800; color: var(--ig-secondary-text); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.ig-input {
+  width: 100%; padding: 12px 16px; background: var(--ig-card-bg); border: 1.5px solid var(--ig-border); border-radius: var(--radius-sm); color: var(--ig-text); font-family: inherit; font-size: 13px; transition: all 0.2s ease;
+}
+.ig-input:focus { outline: none; border-color: #a855f7; box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15); }
+.ig-input[readonly] { opacity: 0.7; }
+textarea.ig-input { resize: vertical; min-height: 90px; }
+
+/* ─── UPLOAD BOX ─── */
+.ig-photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+.ig-photo-box { background: var(--ig-card-bg); border: 2px dashed var(--ig-border); border-radius: var(--radius-md); padding: 16px; text-align: center; position: relative; transition: all 0.2s ease; }
+.ig-photo-box:hover { border-color: #a855f7; }
+.ig-dropzone { cursor: pointer; display: block; }
+.ig-dropzone input { display: none; }
+
+.ig-preview {
+  width: 100%; height: 160px; border-radius: var(--radius-sm); background: var(--ig-bg); margin-top: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+}
+.ig-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.btn-del-img {
+  position: absolute; top: 6px; right: 6px; background: rgba(239, 68, 68, 0.9); color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 12px; box-shadow: var(--shadow-sm); z-index: 5;
+}
+
+.ig-btn {
+  width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); color: white;
+}
+.ig-btn-gradient { background: var(--grad-btn); box-shadow: var(--shadow-glow); }
+.ig-btn-gradient:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.ig-btn-gradient:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+.ig-btn-danger { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); color: white; }
+
+/* ─── ONLINE BADGE INDICATOR ─── */
+.online-dot {
+  width: 10px; height: 10px; border-radius: 50%; background-color: #10b981; display: inline-block; animation: pulseGreen 1.5s infinite;
+}
+
+/* ─── MODAL DETAIL ─── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 1000; padding: 16px; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal-card {
+  background: var(--ig-card-bg); color: var(--ig-text); border-radius: var(--radius-lg); max-width: 650px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: var(--shadow-lg); border: 1px solid var(--ig-border); animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-close {
+  position: absolute; top: 12px; right: 14px; background: rgba(0,0,0,0.6); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; z-index: 10; transition: transform 0.2s;
+}
+.modal-close:hover { transform: rotate(90deg); }
+
+.menu-options-wrapper { position: relative; display: inline-block; }
+.btn-menu-options { background: var(--ig-bg); border: 1px solid var(--ig-border); color: var(--ig-text); width: 34px; height: 34px; border-radius: 50%; font-size: 18px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.dropdown-options-menu {
+  display: none; position: absolute; top: 40px; right: 0; background: var(--ig-card-bg); border: 1px solid var(--ig-border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); min-width: 160px; z-index: 100; overflow: hidden; animation: fadeInScale 0.18s ease-out;
+}
+.dropdown-options-menu.show { display: block; }
+
+.dropdown-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; background: transparent; border: none; text-align: left; font-size: 12px; font-weight: 700; color: var(--ig-text); cursor: pointer;
+}
+.dropdown-item:hover { background: var(--ig-bg); }
+.dropdown-item.danger { color: var(--ig-red); }
+
+.modal-body { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+
+.post-detail-media { width: 100%; background: var(--ig-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.post-detail-media img { width: 100%; height: auto; max-height: 60vh; object-fit: contain; display: block; }
+
+.comments-container { padding: 14px 18px; border-top: 1px solid var(--ig-border); background: var(--ig-card-bg); }
+.comments-list { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 12px; }
+.comment-item { font-size: 12px; line-height: 1.4; color: var(--ig-text); word-break: break-word; }
+.comment-user { font-weight: 800; margin-right: 6px; }
+
+.comment-form { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--ig-border); padding-top: 12px; }
+.comment-input-user { width: 90px; padding: 8px; font-size: 11px; border: 1px solid var(--ig-border); border-radius: var(--radius-sm); background: var(--ig-bg); color: var(--ig-text); }
+.comment-input-text { flex: 1; padding: 8px 12px; font-size: 12px; border: 1px solid var(--ig-border); border-radius: var(--radius-sm); background: var(--ig-bg); color: var(--ig-text); }
+.comment-btn-submit { background: transparent; border: none; color: #7c3aed; font-weight: 800; font-size: 12px; cursor: pointer; }
+
+/* ─── FULLSCREEN OVERLAY ─── */
+.fullscreen-overlay {
+  display: none; position: fixed; inset: 0; background: var(--ig-bg); backdrop-filter: blur(12px); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; touch-action: none;
+}
+.fullscreen-overlay.active { display: flex; }
+
+.fullscreen-img-wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+.fullscreen-img, .fullscreen-video { max-width: 95%; max-height: 90vh; object-fit: contain; border-radius: 8px; transition: transform 0.05s linear; transform-origin: center center; }
+
+/* Tombol Tutup (X) Fullscreen yang Tegas, Jelas, & Kontras Tinggi */
+.fullscreen-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #ef4444;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+  z-index: 2010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
+}
+.fullscreen-close:hover {
+  transform: scale(1.12);
+  background: #dc2626;
+}
+
+#exportCanvas { display: none; }
+</style>
+</head>
+<body>
+
+<!-- KANVAS ANIMASI EFEK BEKERJA DI LATAR BELAKANG -->
+<canvas id="theme-bg-canvas"></canvas>
+
+<!-- LOADING SCREEN DENGAN LOGO & TEMA YANG LANGSUNG MENYESUAIKAN -->
+<div id="app-init-loader">
+  <img src="https://res.cloudinary.com/vf5nikiz/image/upload/v1785164146/IMG_20260707_085722_slsyiz.jpg" alt="Logo Paragon" style="height: 52px; object-fit: contain;">
+  <div class="spinner-ring"></div>
+  <div style="font-weight: 800; color: #6366f1; font-size: 13px; letter-spacing: 0.5px;">Memuat KASIH System...</div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="success-modal-overlay" id="successModal">
+  <div class="success-modal-card">
+    <svg class="checkmark-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+      <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+      <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+    </svg>
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:6px;">Berhasil!</h3>
+    <p style="font-size:12px; color:var(--ig-secondary-text);" id="successModalText">Operasi berhasil dilaksanakan.</p>
+  </div>
+</div>
+
+<!-- CUSTOM ALERT / CONFIRMATION MODAL -->
+<div class="custom-alert-overlay" id="customAlertOverlay">
+  <div class="custom-alert-card">
+    <div class="alert-icon-wrapper" id="alertIcon">🔔</div>
+    <div class="custom-alert-title" id="alertTitle">Peringatan</div>
+    <div class="custom-alert-message" id="alertMessage">Apakah Anda yakin ingin melanjutkan tindakan ini?</div>
+    <div id="alertInputContainer" style="display:none; margin-bottom:16px;">
+      <input type="text" id="alertInputText" class="ig-input" placeholder="Masukkan kata kunci..." style="text-align:center;">
+    </div>
+    <div class="alert-btn-group" id="alertBtnGroup">
+      <button class="alert-btn alert-btn-cancel" onclick="closeCustomAlert(false)">Batal</button>
+      <button class="alert-btn alert-btn-confirm" id="alertConfirmBtn" onclick="closeCustomAlert(true)">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="exportCanvas"></canvas>
+
+<!-- HEADER -->
+<header class="ig-header">
+  <div class="header-container">
+    <a href="#" class="brand-wrapper" onclick="tampilkanForm('menuUtama'); return false;">
+      <img src="https://res.cloudinary.com/vf5nikiz/image/upload/v1785164146/IMG_20260707_085722_slsyiz.jpg" alt="Paragon Logo" class="brand-logo-img">
+      <span class="ig-logo">KASIH</span>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="btn-pwa-install" id="btnPwaHeader" onclick="installPWA()">
+        <span>📱</span> Install App
+      </button>
+      <div class="header-clock-box">
+        <div id="liveClockTime" class="header-clock-time">00:00:00</div>
+        <div id="liveClockDate" class="header-clock-date">Senin, 1 Jan 2026</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<button class="floating-pwa-btn" id="btnPwaFloating" onclick="installPWA()">
+  📲 Install Aplikasi KASIH
+</button>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- DASHBOARD (BERANDA) -->
+  <section id="menuUtama" class="page-section active">
+    
+    <!-- REELS STORIES BUBBLE -->
+    <div class="sticky-stories-container">
+      <div class="stories-wrapper" id="storiesContainer">
+        <div class="story-item" onclick="openGenerateJpg()">
+          <div class="story-ring add-ring"><div class="story-avatar">➕</div></div>
+          <div class="story-title">Tambah</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD UTAMA KAIZEN SYSTEM -->
+    <div>
+      <div style="background: var(--grad-surface); border:1px solid var(--ig-border); border-radius:var(--radius-lg); padding:48px 32px; text-align:center; box-shadow: var(--shadow-lg); width:100%;">
+        <img src="https://res.cloudinary.com/vf5nikiz/image/upload/v1785164146/IMG_20260707_085722_slsyiz.jpg" alt="Paragon Logo" style="height:64px; object-fit:contain; margin-bottom:20px;">
+        <h2 style="font-size: 24px; font-weight: 800; background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;">Kaizen System KASIH</h2>
+        <p style="font-size: 14px; color: var(--ig-secondary-text); max-width: 600px; margin: 0 auto; line-height: 1.6;">
+          Platform digitalisasi laporan perbaikan Kaizen. Terintegrasi dengan Realtime Database, Auto Update & Responsif Lintas Perangkat.
+        </p>
+      </div>
+    </div>
+
+    <!-- BANNER PENGUMUMAN MULTI SLIDER -->
+    <div id="homeBannerContainer" class="announcement-container"></div>
+
+  </section>
+
+  <!-- FORM 1: INPUT LAPORAN FOTO -->
+  <section id="formGeneratePdf" class="page-section">
+    <div class="ig-form-card">
+      <div class="ig-form-title">📝 Buat Laporan Kaizen</div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        <div class="form-group">
+          <label>Nama Pelaksana</label>
+          <input type="text" id="nama" class="ig-input" placeholder="Nama pelaksana...">
+        </div>
+        <div class="form-group">
+          <label>Judul Kaizen / Improvement</label>
+          <input type="text" id="dept" class="ig-input" placeholder="Contoh: Perbaikan Rak A">
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div class="form-group">
+          <label>Area / ZTJ</label>
+          <input type="text" id="area" class="ig-input" placeholder="Area A.1a">
+        </div>
+        <div class="form-group">
+          <label>Week (ISO)</label>
+          <input type="number" id="week" class="ig-input" readonly>
+        </div>
+        <div class="form-group">
+          <label>Tanggal Pelaksanaan</label>
+          <input type="date" id="tanggal" class="ig-input">
+        </div>
+      </div>
+
+      <div class="ig-photo-grid">
+        <div class="ig-photo-box">
+          <label class="ig-dropzone" for="fotoSebelum">
+            <span style="font-size:12px; font-weight:800; color:var(--ig-red);">🔴 BEFORE</span>
+            <div class="ig-preview" id="pre-sebelum">
+              <span style="font-size:11px; color:var(--ig-secondary-text);">Upload Foto</span>
+              <button type="button" class="btn-del-img" id="btn-del-before" onclick="clearImage('fotoSebelum', 'pre-sebelum', 'btn-del-before')">✕</button>
+            </div>
+            <input type="file" id="fotoSebelum" accept="image/*" onchange="previewImg(this, 'pre-sebelum', 'btn-del-before')">
+          </label>
+        </div>
+
+        <div class="ig-photo-box">
+          <label class="ig-dropzone" for="fotoSesudah">
+            <span style="font-size:12px; font-weight:800; color:var(--ig-green);">🟢 AFTER</span>
+            <div class="ig-preview" id="pre-sesudah">
+              <span style="font-size:11px; color:var(--ig-secondary-text);">Upload Foto</span>
+              <button type="button" class="btn-del-img" id="btn-del-after" onclick="clearImage('fotoSesudah', 'pre-sesudah', 'btn-del-after')">✕</button>
+            </div>
+            <input type="file" id="fotoSesudah" accept="image/*" onchange="previewImg(this, 'pre-sesudah', 'btn-del-after')">
+          </label>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        <div class="form-group">
+          <label>Penjelasan Kondisi Sebelum</label>
+          <textarea id="deskripsi" class="ig-input" placeholder="Uraikan kondisi sebelum..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Penjelasan Kondisi Setelah</label>
+          <textarea id="perbaikan" class="ig-input" placeholder="Uraikan hasil perbaikan..."></textarea>
+        </div>
+      </div>
+
+      <button class="ig-btn ig-btn-gradient" id="btnGenerateJpg" onclick="simpanLaporanLengkap()" style="margin-top: 12px;">
+        🚀 Simpan Laporan
+      </button>
+    </div>
+  </section>
+
+  <!-- FORM 2: UPLOAD DIRECT -->
+  <section id="formUploadDirect" class="page-section">
+    <div class="ig-form-card">
+      <div class="ig-form-title">☁️ Direct Upload File</div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="form-group">
+          <label>Nama Pelaksana</label>
+          <input type="text" id="u_nama" class="ig-input" placeholder="Nama pelaksana...">
+        </div>
+        <div class="form-group">
+          <label>ZTJ / Area</label>
+          <input type="text" id="u_area" class="ig-input" placeholder="Area kerja...">
+        </div>
+        <div class="form-group">
+          <label>Week (ISO)</label>
+          <input type="number" id="u_week" class="ig-input" readonly>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label>File Dokumen / Foto Direct</label>
+        <label class="ig-photo-box" for="u_file" style="display:block; padding: 32px; cursor:pointer;">
+          <div style="font-size: 32px;">📎</div>
+          <div style="font-size: 13px; color: #7c3aed; font-weight:800; margin-top:8px;">Pilih PDF / Gambar</div>
+          <div id="u_file_name" style="font-size: 12px; color: var(--ig-green); font-weight:700; margin-top: 6px;"></div>
+          <input type="file" id="u_file" accept=".pdf,image/*" onchange="showFileName()" style="display:none;">
+        </label>
+      </div>
+
+      <button class="ig-btn ig-btn-gradient" id="btnUploadSimpan" onclick="simpanUpload()">
+        ✈️ Upload Ke Server Realtime
+      </button>
+    </div>
+  </section>
+
+  <!-- EXPLORE GRID FEED PAGE -->
+  <section id="formData" class="page-section">
+    <div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <input type="text" id="f_nama" class="ig-input" placeholder="🔍 Filter Nama..." oninput="renderDataExplore()">
+        <input type="text" id="f_area" class="ig-input" placeholder="📍 Filter Area..." oninput="renderDataExplore()">
+        <input type="number" id="f_week" class="ig-input" placeholder="Wk" oninput="renderDataExplore()">
+      </div>
+
+      <div class="explore-grid" id="exploreGrid"></div>
+
+      <div id="dataEmpty" style="text-align: center; padding: 60px; color: var(--ig-secondary-text); display: none;">
+        Belum ada postingan foto.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SECTION PANEL ADMIN ══ -->
+  <section id="adminPanel" class="page-section">
+    <div class="ig-form-card">
+      <div class="ig-form-title">⚙️ Pengaturan System Admin</div>
+
+      <!-- OTENTIKASI ADMIN PIN -->
+      <div id="adminAuthBox" style="text-align:center; padding: 30px 0;">
+        <p style="margin-bottom:14px; font-weight:700;">Masukkan PIN Khusus Admin untuk Akses Pengaturan:</p>
+        <div style="max-width:280px; margin:0 auto; display:flex; gap:8px;">
+          <input type="password" id="adminPinInput" class="ig-input" placeholder="Masukkan PIN..." style="text-align:center;">
+          <button class="ig-btn ig-btn-gradient" style="width: auto;" onclick="verifikasiAdminPin()">Masuk</button>
+        </div>
+      </div>
+
+      <!-- HUB UTAMA PENGATURAN -->
+      <div id="adminContentBox" style="display:none;">
+        
+        <div id="settingsMenuHub" class="settings-menu-grid">
+          
+          <div class="settings-menu-item" onclick="bukaSubPengaturan('settingDataMassal')">
+            <div class="settings-menu-icon">📦</div>
+            <div>
+              <div class="settings-menu-title">Manajemen Data & Berkas</div>
+              <div class="settings-menu-desc">Unduh seluruh foto sekaligus atau hapus semua laporan.</div>
+            </div>
+          </div>
+
+          <div class="settings-menu-item" onclick="bukaSubPengaturan('settingOnlineUsers')">
+            <div class="settings-menu-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">👥</div>
+            <div>
+              <div class="settings-menu-title" style="display:flex; align-items:center; gap:8px;">
+                Monitoring Operator Online <span class="online-dot"></span>
+              </div>
+              <div class="settings-menu-desc">Lihat berapa banyak pengguna/operator yang sedang membuka aplikasi saat ini.</div>
+            </div>
+          </div>
+
+          <div class="settings-menu-item" onclick="bukaSubPengaturan('settingTemaUI')">
+            <div class="settings-menu-icon">🎮</div>
+            <div>
+              <div class="settings-menu-title">Pengaturan Tema Dynamic UI Canvas</div>
+              <div class="settings-menu-desc">Koleksi Tema Terang (Light) & Gelap (Dark) Animasi Bergerak.</div>
+            </div>
+          </div>
+
+          <div class="settings-menu-item" onclick="bukaSubPengaturan('settingBannerHome')">
+            <div class="settings-menu-icon">📢</div>
+            <div>
+              <div class="settings-menu-title">Manajemen Banner Pengumuman (Gambar / Video)</div>
+              <div class="settings-menu-desc">Unggah banner pengumuman dalam bentuk Gambar atau Video MP4/WebM.</div>
+            </div>
+          </div>
+
+          <div class="settings-menu-item" onclick="bukaSubPengaturan('settingFontApp')">
+            <div class="settings-menu-icon">🔤</div>
+            <div>
+              <div class="settings-menu-title">Pengaturan Gaya Font Global</div>
+              <div class="settings-menu-desc">Ubah jenis font tampilan aplikasi sesuai selera.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── SUB-PENGATURAN 0: MONITORING OPERATOR ONLINE ─── -->
+        <div id="settingOnlineUsers" class="settings-detail-panel">
+          <button class="btn-back-settings" onclick="kembaliKeHubSettings()">← Kembali ke Pengaturan</button>
+
+          <div class="admin-card-section">
+            <div class="admin-card-header">
+              <span class="online-dot"></span> <span>Status Pengguna / Operator Aktif</span>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; background: var(--ig-bg); padding: 18px 24px; border-radius: var(--radius-md); border: 1px solid var(--ig-border); margin-bottom: 20px;">
+              <div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--ig-secondary-text); text-transform: uppercase;">Operator Sedang Aktif</div>
+                <div style="font-size: 32px; font-weight: 800; background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="adminOnlineCount">0 Perangkat</div>
+              </div>
+              <div style="font-size: 40px;">📱</div>
+            </div>
+
+            <div style="font-size:12px; font-weight:800; margin-bottom:12px;">Rincian Perangkat Terhubung:</div>
+            <div id="adminOnlineUsersList" style="display:flex; flex-direction:column; gap:8px;"></div>
+          </div>
+        </div>
+
+        <!-- ─── SUB-PENGATURAN 1: DATA MASSAL ─── -->
+        <div id="settingDataMassal" class="settings-detail-panel">
+          <button class="btn-back-settings" onclick="kembaliKeHubSettings()">← Kembali ke Pengaturan</button>
+          
+          <div class="admin-card-section">
+            <div class="admin-card-header">
+              <span>📦</span> <span>Manajemen Foto & Database Sekaligus</span>
+            </div>
+            <p style="font-size:12px; color:var(--ig-secondary-text); margin-bottom:16px;">
+              Lakukan tindakan massal untuk mengunduh seluruh file foto sekaligus ke galeri perangkat Anda atau menghapus seluruh isi database laporan.
+            </p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+              <button class="ig-btn ig-btn-gradient" onclick="adminDownloadSemuaFoto()">
+                📥 Download Semua Foto Sekaligus
+              </button>
+              <button class="ig-btn ig-btn-danger" onclick="adminHapusSemuaFoto()">
+                🗑️ Hapus Semua Laporan Sekaligus
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── SUB-PENGATURAN 2: TEMA UI ─── -->
+        <div id="settingTemaUI" class="settings-detail-panel">
+          <button class="btn-back-settings" onclick="kembaliKeHubSettings()">← Kembali ke Pengaturan</button>
+
+          <div class="admin-card-section">
+            <div class="admin-card-header">
+              <span>☀️</span> <span>Koleksi Tema Terang (Light UI Realtime)</span>
+            </div>
+            <p style="font-size:12px; color:var(--ig-secondary-text); margin-bottom:14px;">
+              Pilihan variasi tema terang dengan efek gradien dan pencahayaan latar yang segar & modern:
+            </p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom: 24px;">
+              <button class="ig-btn" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a;" onclick="konfirmasiGantiTema('theme-light')">☀️ Light Clean</button>
+              <button class="ig-btn" style="background:#fff1f2; border:1px solid #fecdd3; color:#881337;" onclick="konfirmasiGantiTema('theme-bright-pastel')">🌸 Bright Pastel</button>
+              <button class="ig-btn" style="background:#fefef2; border:1px solid #fef08a; color:#713f12;" onclick="konfirmasiGantiTema('theme-fresh-citrus')">🍋 Fresh Citrus</button>
+              <button class="ig-btn" style="background:#f0f9ff; border:1px solid #bae6fd; color:#0c4a6e;" onclick="konfirmasiGantiTema('theme-nordic-clean')">❄️ Nordic Clean</button>
+              <button class="ig-btn" style="background:#f0fdf4; border:1px solid #bbf7d0; color:#064e3b;" onclick="konfirmasiGantiTema('theme-soft-mint')">🍃 Soft Mint</button>
+              <button class="ig-btn" style="background:#fff5f5; border:1px solid #ffe4e6; color:#4c0519;" onclick="konfirmasiGantiTema('theme-rose-gold')">💖 Rose Gold</button>
+              <button class="ig-btn" style="background:#ecfeff; border:1px solid #a5f3fc; color:#164e63;" onclick="konfirmasiGantiTema('theme-ocean-breeze')">🌊 Ocean Breeze</button>
+              <button class="ig-btn" style="background:#faf5ff; border:1px solid #e9d5ff; color:#3b0764;" onclick="konfirmasiGantiTema('theme-lavender-field')">🪻 Lavender Field</button>
+              <button class="ig-btn" style="background:#fffbeb; border:1px solid #fef3c7; color:#451a03;" onclick="konfirmasiGantiTema('theme-warm-cappuccino')">☕ Warm Cappuccino</button>
+            </div>
+
+            <div class="admin-card-header">
+              <span>🎮</span> <span>Koleksi Tema Gelap (Dark & Dynamic Canvas)</span>
+            </div>
+            <p style="font-size:12px; color:var(--ig-secondary-text); margin-bottom:14px;">
+              Tema gelap elegan dengan animasi efek cahaya konsol bergerak di latar belakang:
+            </p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+              <button class="ig-btn" style="background:#050a14; border:1px solid #00d4ff; color:#00d4ff;" onclick="konfirmasiGantiTema('theme-ps5')">🎮 PS5 Particles</button>
+              <button class="ig-btn" style="background:#030d1a; border:1px solid #0072ce; color:#60a5fa;" onclick="konfirmasiGantiTema('theme-ps4')">🔵 PS4 Waves</button>
+              <button class="ig-btn" style="background:#09050d; border:1px solid #ff0055; color:#fcee0a;" onclick="konfirmasiGantiTema('theme-cyberpunk')">⚡ Cyberpunk Synth</button>
+              <button class="ig-btn" style="background:#020b0a; border:1px solid #00ff87; color:#00ff87;" onclick="konfirmasiGantiTema('theme-neon')">❇️ Neon Grid</button>
+              <button class="ig-btn" style="background:#140710; border:1px solid #ff512f; color:#ffd5ec;" onclick="konfirmasiGantiTema('theme-sunset')">🌅 Sunset Waves</button>
+              <button class="ig-btn" style="background:#03120f; border:1px solid #38ef7d; color:#d1fae5;" onclick="konfirmasiGantiTema('theme-emerald')">🌲 Emerald Stream</button>
+              <button class="ig-btn" style="background:#1e1f29; border:1px solid #bd93f9; color:#ff79c6;" onclick="konfirmasiGantiTema('theme-dracula')">🧛 Dracula Night</button>
+              <button class="ig-btn" style="background:#020617; border:1px solid #818cf8; color:#f1f5f9;" onclick="konfirmasiGantiTema('theme-midnight')">🌌 Midnight Aurora</button>
+              <button class="ig-btn" style="background:#0c0a09; border:1px solid #f59e0b; color:#fef08a;" onclick="konfirmasiGantiTema('theme-gold')">👑 Gold Shine</button>
+              <button class="ig-btn" style="background:#05000a; border:1px solid #33ff00; color:#ff00cc;" onclick="konfirmasiGantiTema('theme-retrogaming')">🕹️ Retro Pixel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── SUB-PENGATURAN 3: BANNER GAMBAR & VIDEO ─── -->
+        <div id="settingBannerHome" class="settings-detail-panel">
+          <button class="btn-back-settings" onclick="kembaliKeHubSettings()">← Kembali ke Pengaturan</button>
+
+          <div class="admin-card-section">
+            <div class="admin-card-header">
+              <span>📢</span> <span>Unggah Multi-Banner Pengumuman (Gambar / Video MP4)</span>
+            </div>
+            <p style="font-size:12px; color:var(--ig-secondary-text); margin-bottom:16px;">
+              Pilih file Gambar (.jpg, .png) atau Video (.mp4, .webm). Video banner akan terputar otomatis di halaman Home.
+            </p>
+
+            <div class="form-group">
+              <label>Pilih File Banner (Gambar / Video)</label>
+              <input type="file" id="adminBannerFile" accept="image/*,video/mp4,video/webm" class="ig-input">
+            </div>
+            <div class="form-group">
+              <label>Pesan / Teks Keterangan Banner</label>
+              <input type="text" id="adminBannerText" class="ig-input" placeholder="Contoh: Video Pengumuman Kaizen Pekan Ini!">
+            </div>
+            <button class="ig-btn ig-btn-gradient" style="margin-bottom: 20px;" onclick="tambahBannerAdmin()">
+              ➕ Tambahkan Banner
+            </button>
+
+            <div style="font-size:12px; font-weight:800; margin-bottom:10px;">Daftar Banner Aktif Saat Ini:</div>
+            <div id="adminBannerList" style="display:flex; flex-direction:column; gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- ─── SUB-PENGATURAN 4: GAYA FONT ─── -->
+        <div id="settingFontApp" class="settings-detail-panel">
+          <button class="btn-back-settings" onclick="kembaliKeHubSettings()">← Kembali ke Pengaturan</button>
+
+          <div class="admin-card-section">
+            <div class="admin-card-header">
+              <span>🔤</span> <span>Koleksi Font Tampilan Aplikasi Global</span>
+            </div>
+            <p style="font-size:12px; color:var(--ig-secondary-text); margin-bottom:16px;">
+              Pilih gaya font populer dari Google Fonts atau ketik font kustom. Perubahan font di sini akan langsung mengubah gaya font di SELURUH PERANGKAT PENGGUNA secara realtime!
+            </p>
+
+            <div class="form-group">
+              <label>Pilih Gaya Font Google Fonts</label>
+              <select id="adminFontSelect" class="ig-input" onchange="konfirmasiGantiFontSelect(this.value)">
+                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans (Modern Clean - Default)</option>
+                <option value="'Poppins', sans-serif">Poppins (Geometric Soft)</option>
+                <option value="'Montserrat', sans-serif">Montserrat (Bold Corporate)</option>
+                <option value="'Inter', sans-serif">Inter (UI Minimalist)</option>
+                <option value="'Nunito', sans-serif">Nunito (Friendly Round)</option>
+                <option value="'Roboto', sans-serif">Roboto (Tech Standard)</option>
+                <option value="'Open Sans', sans-serif">Open Sans (Neutral Reading)</option>
+                <option value="'Orbitron', sans-serif">Orbitron (Futuristic Cyber)</option>
+                <option value="'Press Start 2P', monospace">Press Start 2P (Pixel Retro Gaming)</option>
+                <option value="'Bebas Neue', sans-serif">Bebas Neue (Bold Display Cap)</option>
+                <option value="'Playfair Display', serif">Playfair Display (Luxury Editorial Serif)</option>
+                <option value="'Cinzel', serif">Cinzel (Classic Elegance)</option>
+                <option value="'Fredoka', sans-serif">Fredoka (Bubble Fun Playful)</option>
+                <option value="'Fira Code', monospace">Fira Code (Developer Monospace)</option>
+                <option value="'Dancing Script', cursive">Dancing Script (Elegant Handwriting)</option>
+                <option value="'Caveat', cursive">Caveat (Casual Handwriting)</option>
+                <option value="'Pacifico', cursive">Pacifico (Retro Brush Script)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Atau Ketik Font Kustom CSS</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="adminCustomFontInput" class="ig-input" placeholder="Misal: 'Arial', sans-serif">
+                <button class="ig-btn ig-btn-gradient" style="width:120px;" onclick="konfirmasiGantiFontKustom()">Gunakan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="ig-bottom-nav">
+  <div class="bottom-nav-container">
+    <button class="nav-tab active" id="nav-home" onclick="tampilkanForm('menuUtama')">
+      <div>🏠</div><span>Home</span>
+    </button>
+    <button class="nav-tab" id="nav-input" onclick="openUploadDirect()">
+      <div>➕</div><span>Posting</span>
+    </button>
+    <button class="nav-tab" id="nav-data" onclick="tampilkanForm('formData'); muatDataExplore();">
+      <div>🔍</div><span>Explore</span>
+    </button>
+    <button class="nav-tab" id="nav-admin" onclick="tampilkanForm('adminPanel')">
+      <div>⚙️</div><span>Admin</span>
+    </button>
+  </div>
+</nav>
+
+<!-- MODAL DETAIL POSTINGAN -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    <div class="modal-body" id="modalDetailContent"></div>
+  </div>
+</div>
+
+<!-- MODAL FULLSCREEN PREVIEW (GAMBAR / VIDEO) -->
+<div class="fullscreen-overlay" id="fullscreenModal">
+  <button class="fullscreen-close" onclick="closeFullscreenModal()" title="Tutup">✕</button>
+  <div class="fullscreen-img-wrapper" id="fullscreenImgWrapper">
+    <img id="fullscreenImg" class="fullscreen-img" src="" alt="Fullscreen Preview" style="display:none;">
+    <video id="fullscreenVideo" class="fullscreen-video" src="" controls autoplay playsinline style="display:none;"></video>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyC0UbwMpV6B4ncM1zlw8MygToCb3M-Ryyw",
+  authDomain: "input-pallet.firebaseapp.com",
+  databaseURL: "https://input-pallet-default-rtdb.firebaseio.com",
+  projectId: "input-pallet",
+  storageBucket: "input-pallet.firebasestorage.app",
+  messagingSenderId: "529883155847",
+  appId: "1:529883155847:web:aac65642a3e317f0279722",
+  measurementId: "G-426NS04MX3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+firebase.auth().signInAnonymously().catch(err => console.warn("Auth anonim:", err));
+
+const appStartTime = Date.now();
+let initialDataLoaded = false;
+
+function hideInitialLoader() {
+  if (initialDataLoaded) return;
+  initialDataLoaded = true;
+  const elapsedTime = Date.now() - appStartTime;
+  const minDisplayTime = 1200;
+  const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+
+  setTimeout(() => {
+    const initLoader = document.getElementById('app-init-loader');
+    if (initLoader) initLoader.classList.add('hidden');
+  }, remainingTime);
+}
+
+setTimeout(() => { hideInitialLoader(); }, 7000);
+
+/* SISTEM PRESENCE / OPERATOR ONLINE TRACKER */
+function initOnlinePresence() {
+  const myConnectionsRef = db.ref('online_users');
+  const connectedRef = db.ref('.info/connected');
+
+  connectedRef.on('value', (snap) => {
+    if (snap.val() === true) {
+      const con = myConnectionsRef.push();
+      con.onDisconnect().remove();
+      con.set({
+        onlineAt: firebase.database.ServerValue.TIMESTAMP,
+        userAgent: navigator.userAgent
+      });
+    }
+  });
+
+  db.ref('online_users').on('value', (snap) => {
+    const countElem = document.getElementById('adminOnlineCount');
+    const listElem = document.getElementById('adminOnlineUsersList');
+    
+    if (!snap.exists()) {
+      if (countElem) countElem.textContent = '0 Perangkat';
+      if (listElem) listElem.innerHTML = '<div style="font-size:11px; color:var(--ig-secondary-text);">Belum ada pengguna aktif.</div>';
+      return;
+    }
+
+    const onlineData = snap.val();
+    const count = Object.keys(onlineData).length;
+    if (countElem) countElem.textContent = `${count} Perangkat`;
+
+    if (listElem) {
+      let html = '';
+      Object.keys(onlineData).forEach((key, index) => {
+        const item = onlineData[key];
+        const timeStr = item.onlineAt ? new Date(item.onlineAt).toLocaleTimeString('id-ID') : 'Baru saja';
+        const isMobile = /Mobi|Android/i.test(item.userAgent) ? '📱 HP / Mobile' : '💻 Laptop / PC';
+        
+        html += `
+          <div style="display:flex; align-items:center; justify-content:space-between; background:var(--ig-bg); padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--ig-border);">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="online-dot"></span>
+              <div>
+                <div style="font-weight:800; font-size:12px;">Pengguna ${index + 1} (${isMobile})</div>
+                <div style="font-size:10px; color:var(--ig-secondary-text);">Mulai Aktif: ${timeStr}</div>
+              </div>
+            </div>
+            <span style="font-size:10px; font-weight:800; color:var(--ig-green); background:rgba(16, 185, 129, 0.12); padding:4px 8px; border-radius:var(--radius-full);">ONLINE</span>
+          </div>`;
+      });
+      listElem.innerHTML = html;
+    }
+  });
+}
+
+/* ENGINE CANVAS ANIMASI LATAR */
+let bgCanvas, bgCtx, animFrameId;
+let particles = [];
+let waveStep = 0;
+let currentThemeMode = 'light';
+
+function initThemeCanvas() {
+  bgCanvas = document.getElementById('theme-bg-canvas');
+  if (!bgCanvas) return;
+  bgCtx = bgCanvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+}
+
+function resizeCanvas() {
+  if (!bgCanvas) return;
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+  createParticles();
+}
+
+function createParticles() {
+  particles = [];
+  const count = Math.floor(window.innerWidth / 25);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      radius: Math.random() * 3 + 1,
+      speedX: (Math.random() - 0.5) * 0.6,
+      speedY: (Math.random() - 0.5) * 0.6,
+      alpha: Math.random() * 0.5 + 0.2
+    });
+  }
+}
+
+function drawAnimatedBg() {
+  if (!bgCtx || currentThemeMode.startsWith('theme-light') || currentThemeMode === 'theme-bright-pastel' || currentThemeMode === 'theme-fresh-citrus' || currentThemeMode === 'theme-nordic-clean' || currentThemeMode === 'theme-soft-mint' || currentThemeMode === 'theme-rose-gold' || currentThemeMode === 'theme-ocean-breeze' || currentThemeMode === 'theme-lavender-field' || currentThemeMode === 'theme-warm-cappuccino') {
+    if (bgCtx) bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    return;
+  }
+
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  waveStep += 0.015;
+
+  const w = bgCanvas.width;
+  const h = bgCanvas.height;
+
+  if (currentThemeMode === 'theme-ps5' || currentThemeMode === 'theme-ps4' || currentThemeMode === 'theme-midnight' || currentThemeMode === 'theme-sunset') {
+    bgCtx.save();
+    for (let i = 0; i < 3; i++) {
+      bgCtx.beginPath();
+      bgCtx.moveTo(0, h * 0.5);
+      for (let x = 0; x <= w; x += 30) {
+        const y = Math.sin(x * 0.003 + waveStep + i) * 80 + Math.cos(x * 0.002 + waveStep) * 40 + h * (0.4 + i * 0.15);
+        bgCtx.lineTo(x, y);
+      }
+      bgCtx.lineTo(w, h);
+      bgCtx.lineTo(0, h);
+      
+      let waveGrad = bgCtx.createLinearGradient(0, 0, w, h);
+      if (currentThemeMode === 'theme-ps5') {
+        waveGrad.addColorStop(0, `rgba(0, 212, 255, ${0.15 - i * 0.03})`);
+        waveGrad.addColorStop(1, `rgba(123, 44, 191, ${0.12 - i * 0.03})`);
+      } else if (currentThemeMode === 'theme-ps4') {
+        waveGrad.addColorStop(0, `rgba(0, 114, 206, ${0.2 - i * 0.04})`);
+        waveGrad.addColorStop(1, `rgba(0, 67, 156, ${0.15 - i * 0.03})`);
+      } else if (currentThemeMode === 'theme-sunset') {
+        waveGrad.addColorStop(0, `rgba(255, 81, 47, ${0.18 - i * 0.04})`);
+        waveGrad.addColorStop(1, `rgba(221, 36, 118, ${0.12 - i * 0.03})`);
+      } else {
+        waveGrad.addColorStop(0, `rgba(129, 140, 248, ${0.15 - i * 0.03})`);
+        waveGrad.addColorStop(1, `rgba(49, 46, 129, ${0.12 - i * 0.03})`);
+      }
+      
+      bgCtx.fillStyle = waveGrad;
+      bgCtx.fill();
+    }
+    bgCtx.restore();
+  }
+
+  particles.forEach(p => {
+    p.x += p.speedX; p.y += p.speedY;
+    if (p.x < 0) p.x = bgCanvas.width;
+    if (p.x > bgCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = bgCanvas.height;
+    if (p.y > bgCanvas.height) p.y = 0;
+
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    
+    if (currentThemeMode === 'theme-cyberpunk') bgCtx.fillStyle = `rgba(0, 240, 255, ${p.alpha})`;
+    else if (currentThemeMode === 'theme-neon') bgCtx.fillStyle = `rgba(0, 255, 135, ${p.alpha})`;
+    else if (currentThemeMode === 'theme-gold') bgCtx.fillStyle = `rgba(251, 191, 36, ${p.alpha})`;
+    else bgCtx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+    
+    bgCtx.fill();
+  });
+
+  animFrameId = requestAnimationFrame(drawAnimatedBg);
+}
+
+/* PWA SERVICE WORKER */
+let deferredPrompt;
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE_NAME = 'kasih-app-v10';
+    self.addEventListener('install', (e) => {
+      e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])));
+    });
+    self.addEventListener('fetch', (e) => {
+      e.respondWith(caches.match(e.request).then(response => response || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'text/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error:', err));
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btnHeader = document.getElementById('btnPwaHeader');
+  const btnFloating = document.getElementById('btnPwaFloating');
+  if (btnHeader) btnHeader.style.display = 'flex';
+  if (btnFloating && window.innerWidth <= 640) btnFloating.style.display = 'flex';
+});
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then((choiceResult) => {
+    if (choiceResult.outcome === 'accepted') {
+      document.getElementById('btnPwaHeader').style.display = 'none';
+      document.getElementById('btnPwaFloating').style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+}
+
+/* JAM LIVE OTOMATIS */
+function updateLiveClock() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+
+  const timeElem = document.getElementById('liveClockTime');
+  const dateElem = document.getElementById('liveClockDate');
+  if (timeElem) timeElem.textContent = `${hours}:${minutes}:${seconds}`;
+  if (dateElem) dateElem.textContent = now.toLocaleDateString('id-ID', options);
+}
+setInterval(updateLiveClock, 1000);
+
+function triggerSuccessAnimation(msg = "Berhasil Disimpan!") {
+  const modal = document.getElementById('successModal');
+  const modalText = document.getElementById('successModalText');
+  if (modalText) modalText.textContent = msg;
+  if (!modal) return;
+  modal.classList.add('active');
+  setTimeout(() => { modal.classList.remove('active'); }, 2000);
+}
+
+/* CUSTOM ALERT SYSTEM */
+let customAlertCallback = null;
+function showCustomAlert(options) {
+  const overlay = document.getElementById('customAlertOverlay');
+  const icon = document.getElementById('alertIcon');
+  const title = document.getElementById('alertTitle');
+  const msg = document.getElementById('alertMessage');
+  const inputContainer = document.getElementById('alertInputContainer');
+  const inputText = document.getElementById('alertInputText');
+  const confirmBtn = document.getElementById('alertConfirmBtn');
+
+  icon.textContent = options.icon || '🔔';
+  if (options.isDanger) {
+    icon.className = 'alert-icon-wrapper danger';
+    confirmBtn.className = 'alert-btn alert-btn-danger';
+  } else {
+    icon.className = 'alert-icon-wrapper';
+    confirmBtn.className = 'alert-btn alert-btn-confirm';
+  }
+
+  title.textContent = options.title || 'Konfirmasi';
+  msg.textContent = options.message || '';
+  
+  if (options.needInput) {
+    inputContainer.style.display = 'block';
+    inputText.value = '';
+    inputText.placeholder = options.inputPlaceholder || 'Masukkan teks...';
+  } else {
+    inputContainer.style.display = 'none';
+  }
+
+  confirmBtn.textContent = options.confirmText || 'Ya, Lanjutkan';
+  customAlertCallback = options.callback;
+  overlay.classList.add('active');
+}
+
+function closeCustomAlert(isConfirm) {
+  const overlay = document.getElementById('customAlertOverlay');
+  const inputText = document.getElementById('alertInputText').value.trim();
+  overlay.classList.remove('active');
+
+  if (customAlertCallback) {
+    customAlertCallback(isConfirm, inputText);
+    customAlertCallback = null;
+  }
+}
+
+function getOperatorColor(name) {
+  if (!name) return '#a855f7';
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  const colors = ['#f43f5e', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#d946ef', '#06b6d4', '#ec4899', '#22c55e', '#ea580c'];
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function isiWeekOtomatis() {
+  const wk = getWeekNumber(new Date());
+  const today = new Date().toISOString().split('T')[0];
+  const weekInput = document.getElementById('week');
+  const uWeekInput = document.getElementById('u_week');
+  const tanggalInput = document.getElementById('tanggal');
+  
+  if (weekInput) weekInput.value = wk;
+  if (uWeekInput) uWeekInput.value = wk;
+  if (tanggalInput && !tanggalInput.value) tanggalInput.value = today;
+}
+
+/* ─── REALTIME LISTENER UNTUK TEMA & FONT DI SELURUH PERANGKAT ─── */
+function listenGlobalThemeAndFont() {
+  db.ref('app_config/theme').on('value', snapshot => {
+    const newTheme = snapshot.val() || 'theme-light';
+    localStorage.setItem('kasih_active_theme', newTheme);
+    terapkanTemaDom(newTheme);
+  });
+
+  db.ref('app_config/font').on('value', snapshot => {
+    const newFont = snapshot.val() || "'Plus Jakarta Sans', sans-serif";
+    terapkanFontDom(newFont);
+  });
+}
+
+function terapkanTemaDom(themeClass) {
+  document.documentElement.className = themeClass;
+  document.body.className = themeClass;
+  currentThemeMode = themeClass;
+
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  const isLightMode = themeClass.startsWith('theme-light') || themeClass === 'theme-bright-pastel' || themeClass === 'theme-fresh-citrus' || themeClass === 'theme-nordic-clean' || themeClass === 'theme-soft-mint' || themeClass === 'theme-rose-gold' || themeClass === 'theme-ocean-breeze' || themeClass === 'theme-lavender-field' || themeClass === 'theme-warm-cappuccino';
+
+  if (!isLightMode) {
+    drawAnimatedBg();
+  } else if (bgCtx) {
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  }
+}
+
+function terapkanFontDom(fontFamily) {
+  document.documentElement.style.setProperty('--font-global', fontFamily);
+  const selectElem = document.getElementById('adminFontSelect');
+  if (selectElem) selectElem.value = fontFamily;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initThemeCanvas();
+  updateLiveClock();
+  isiWeekOtomatis();
+  muatStories();
+  muatDataExplore();
+  muatBannersHome();
+  initPinchToZoom();
+  listenGlobalThemeAndFont();
+  initOnlinePresence();
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.menu-options-wrapper')) {
+    document.querySelectorAll('.dropdown-options-menu').forEach(m => m.classList.remove('show'));
+  }
+});
+
+function toggleOptionsMenu(event) {
+  event.stopPropagation();
+  const dropdown = event.currentTarget.nextElementSibling;
+  document.querySelectorAll('.dropdown-options-menu').forEach(m => {
+    if (m !== dropdown) m.classList.remove('show');
+  });
+  dropdown.classList.toggle('show');
+}
+
+function tampilkanForm(id) {
+  document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+
+  if(id === 'menuUtama') document.getElementById('nav-home')?.classList.add('active');
+  else if(id === 'formUploadDirect') document.getElementById('nav-input')?.classList.add('active');
+  else if(id === 'formData') document.getElementById('nav-data')?.classList.add('active');
+  else if(id === 'adminPanel') document.getElementById('nav-admin')?.classList.add('active');
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openGenerateJpg() { tampilkanForm('formGeneratePdf'); }
+function openUploadDirect() { tampilkanForm('formUploadDirect'); }
+
+function previewImg(input, targetId, deleteBtnId) {
+  const preview = document.getElementById(targetId);
+  if (input.files && input.files[0]) {
+    preview.innerHTML = `<div class="mini-spinner" style="border-top-color:#a855f7; border-color:var(--ig-border);"></div><button type="button" class="btn-del-img" id="${deleteBtnId}" onclick="clearImage('${input.id}', '${targetId}', '${deleteBtnId}')">✕</button>`;
+    const reader = new FileReader();
+    reader.onload = e => { 
+      setTimeout(() => {
+        preview.innerHTML = `<img src="${e.target.result}"><button type="button" class="btn-del-img" id="${deleteBtnId}" onclick="clearImage('${input.id}', '${targetId}', '${deleteBtnId}')">✕</button>`; 
+        document.getElementById(deleteBtnId).style.display = 'flex';
+      }, 300);
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function clearImage(inputId, targetId, deleteBtnId) {
+  document.getElementById(inputId).value = "";
+  const preview = document.getElementById(targetId);
+  preview.innerHTML = `<span style="font-size:11px; color:var(--ig-secondary-text);">Upload Foto</span><button type="button" class="btn-del-img" id="${deleteBtnId}">✕</button>`;
+}
+
+function showFileName() {
+  const f = document.getElementById('u_file');
+  document.getElementById('u_file_name').textContent = f.files[0] ? '✓ ' + f.files[0].name : '';
+}
+
+function compressImageToBase64(file, maxDim = 1280, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const ratio = Math.min(1, maxDim / Math.max(width, height));
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+      };
+      img.onerror = () => reject(new Error('Gagal membaca gambar'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToBase64Raw(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* LIKE & VIEWS LAPORAN */
+async function tambahLike(postId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const refLike = db.ref(`laporan/${postId}/likes`);
+  try { await refLike.transaction(currentLikes => (currentLikes || 0) + 1); } 
+  catch (err) { console.error("Gagal menambah like:", err); }
+}
+
+async function tambahViewOtomatis(postId) {
+  const refViews = db.ref(`laporan/${postId}/views`);
+  try { await refViews.transaction(currentViews => (currentViews || 0) + 1); } 
+  catch (err) { console.error("Gagal menambah views:", err); }
+}
+
+/* LIKE BANNER HOME (TIDAK MEMUTAR ULANG VIDEO) */
+async function tambahLikeBanner(bannerKey, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const refLike = db.ref(`app_config/banners/${bannerKey}/likes`);
+  try { 
+    const res = await refLike.transaction(currentLikes => (currentLikes || 0) + 1);
+    const newLikes = res.snapshot.val();
+    const countSpan = document.getElementById(`banner-like-count-${bannerKey}`);
+    if (countSpan) {
+      countSpan.textContent = newLikes;
+    }
+  }
+  catch (err) { console.error("Gagal menambah like banner:", err); }
+}
+
+/* KONTROL KECEPATAN MEMUTAR VIDEO BANNER */
+function ubahKecepatanVideoBanner(videoElem, speed) {
+  if (videoElem) {
+    videoElem.playbackRate = parseFloat(speed);
+  }
+}
+
+async function simpanUpload() {
+  const nama = document.getElementById('u_nama').value.trim();
+  const area = document.getElementById('u_area').value.trim();
+  const week = document.getElementById('u_week').value;
+  const fileInput = document.getElementById('u_file');
+
+  if (!nama || !week || fileInput.files.length === 0) {
+    showCustomAlert({
+      icon: '⚠️',
+      title: 'Data Belum Lengkap',
+      message: 'Harap isi Nama Pelaksana, Week, dan pilih File dokumen/foto yang akan diunggah!',
+      confirmText: 'Mengerti'
+    });
+    return;
+  }
+
+  const btn = document.getElementById("btnUploadSimpan");
+  const originalBtnText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="mini-spinner"></span> Sedang Mengunggah File...`;
+
+  const file = fileInput.files[0];
+
+  try {
+    let base64, mimeType;
+    if (file.type.startsWith('image/')) {
+      const compressed = await compressImageToBase64(file, 1280, 0.8);
+      base64 = compressed.base64;
+      mimeType = compressed.mimeType;
+    } else {
+      base64 = await fileToBase64Raw(file);
+      mimeType = file.type || 'application/pdf';
+    }
+
+    const payload = {
+      nama, area, week: Number(week),
+      fileName: file.name,
+      mimeType,
+      fileData: base64,
+      likes: 0,
+      views: 0,
+      tanggal: new Date().toISOString(),
+      timestamp: Date.now()
+    };
+
+    await db.ref('laporan').push().set(payload);
+    triggerSuccessAnimation();
+
+    document.getElementById('u_nama').value = "";
+    document.getElementById('u_area').value = "";
+    document.getElementById('u_file').value = "";
+    document.getElementById('u_file_name').textContent = "";
+    isiWeekOtomatis();
+    tampilkanForm('menuUtama');
+  } catch (err) {
+    showCustomAlert({ icon: '❌', title: 'Gagal Posting', message: err.message, confirmText: 'Tutup', isDanger: true });
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnText;
+  }
+}
+
+/* REELS / STORIES BUBBLE */
+function muatStories() {
+  db.ref('laporan').orderByChild('timestamp').limitToLast(10).on('value', snapshot => {
+    let list10 = [];
+    snapshot.forEach(child => { list10.push({ id: child.key, ...child.val() }); });
+    list10.reverse();
+
+    const storiesContainer = document.getElementById('storiesContainer');
+    let storiesHTML = `
+      <div class="story-item" onclick="openGenerateJpg()">
+        <div class="story-ring add-ring"><div class="story-avatar">➕</div></div>
+        <div class="story-title">Tambah</div>
+      </div>`;
+
+    list10.forEach(item => {
+      const dataUri = item.fileData ? `data:${item.mimeType};base64,${item.fileData}` : '#';
+      const isImage = item.mimeType && item.mimeType.startsWith('image/');
+      storiesHTML += `
+        <div class="story-item" onclick="openDetailModal('${item.id}')">
+          <div class="story-ring">
+            <div class="story-avatar">
+              ${isImage ? `<img src="${dataUri}">` : '📄'}
+            </div>
+          </div>
+          <div class="story-title">${item.nama || 'Laporan'}</div>
+        </div>`;
+    });
+
+    if (storiesContainer) storiesContainer.innerHTML = storiesHTML;
+    hideInitialLoader();
+  }, () => { hideInitialLoader(); });
+}
+
+/* EXPLORE GRID FEED */
+let semuaLaporanExplore = [];
+
+function muatDataExplore() {
+  db.ref('laporan').orderByChild('timestamp').on('value', snapshot => {
+    semuaLaporanExplore = [];
+    snapshot.forEach(child => { semuaLaporanExplore.push({ id: child.key, ...child.val() }); });
+    semuaLaporanExplore.reverse();
+    renderDataExplore();
+
+    const activeModal = document.getElementById('detailModal');
+    if (activeModal && activeModal.classList.contains('active')) {
+      const modalItem = semuaLaporanExplore.find(x => x.id === window.activeDetailPostId);
+      if (modalItem) {
+        const likeCountElem = document.getElementById(`modal-like-count-${modalItem.id}`);
+        const viewCountElem = document.getElementById(`modal-view-count-${modalItem.id}`);
+        if (likeCountElem) likeCountElem.textContent = modalItem.likes || 0;
+        if (viewCountElem) viewCountElem.textContent = modalItem.views || 0;
+      }
+    }
+  });
+}
+
+function renderDataExplore() {
+  const container = document.getElementById('exploreGrid');
+  const empty = document.getElementById('dataEmpty');
+  const fNama = (document.getElementById('f_nama')?.value || '').toLowerCase();
+  const fArea = (document.getElementById('f_area')?.value || '').toLowerCase();
+  const fWeek = document.getElementById('f_week')?.value;
+
+  const filtered = semuaLaporanExplore.filter(item => {
+    const matchNama = !fNama || (item.nama || '').toLowerCase().includes(fNama);
+    const matchArea = !fArea || (item.area || '').toLowerCase().includes(fArea);
+    const matchWeek = !fWeek || String(item.week) === String(fWeek);
+    return matchNama && matchArea && matchWeek;
+  });
+
+  if (!container) return;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  container.innerHTML = filtered.map(item => {
+    const isImage = item.mimeType && item.mimeType.startsWith('image/');
+    const dataUri = item.fileData ? `data:${item.mimeType};base64,${item.fileData}` : '#';
+    const opColor = getOperatorColor(item.nama);
+    const likesCount = item.likes || 0;
+    const viewsCount = item.views || 0;
+
+    return `
+      <div class="explore-item" onclick="openDetailModal('${item.id}')">
+        ${isImage ? `<img src="${dataUri}">` : '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--ig-border); font-size:24px;">📄</div>'}
+        <div class="explore-overlay">
+          <span style="color: ${opColor};">📷 ${item.nama || 'Pelaksana'}</span>
+          <div class="stats-badges">
+            <span>👁️ ${viewsCount}</span>
+            <button type="button" class="btn-like" onclick="tambahLike('${item.id}', event)" title="Suka">
+              ❤️ <span style="font-size:10px; color:#fff;">${likesCount}</span>
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* MODAL DETAIL POSTINGAN */
+function openDetailModal(id) {
+  const item = semuaLaporanExplore.find(x => x.id === id);
+  if (!item) return;
+
+  tambahViewOtomatis(id);
+
+  window.activeDetailPostId = id;
+  const modal = document.getElementById('detailModal');
+  const content = document.getElementById('modalDetailContent');
+  const isImage = item.mimeType && item.mimeType.startsWith('image/');
+  const dataUri = item.fileData ? `data:${item.mimeType};base64,${item.fileData}` : '#';
+  const tgl = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-';
+  const userInitial = (item.nama || 'A')[0].toUpperCase();
+  const opColor = getOperatorColor(item.nama);
+  const likesCount = item.likes || 0;
+  const viewsCount = (item.views || 0) + 1;
+
+  let commentsHTML = '';
+  if (item.comments) {
+    commentsHTML = Object.values(item.comments).map(c => {
+      const cColor = getOperatorColor(c.user);
+      return `
+        <div class="comment-item">
+          <span class="comment-user" style="color: ${cColor};">${c.user}:</span>${c.text}
+        </div>`;
+    }).join('');
+  }
+
+  content.innerHTML = `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--ig-border); position:sticky; top:0; background:var(--ig-card-bg); z-index:5;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:36px; height:36px; border-radius:50%; background:var(--grad-primary); padding:2px;">
+          <div style="width:100%; height:100%; border-radius:50%; background:var(--ig-card-bg); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:${opColor};">${userInitial}</div>
+        </div>
+        <div>
+          <div style="font-weight:800; font-size:14px; color:${opColor};">${item.nama || 'Pelaksana'}</div>
+          <div style="font-size:11px; color:var(--ig-secondary-text);">Area ${item.area || '-'} • Week ${item.week ?? '-'}</div>
+        </div>
+      </div>
+
+      <div class="menu-options-wrapper" style="margin-right: 36px;">
+        <button class="btn-menu-options" onclick="toggleOptionsMenu(event)" title="Opsi">⋮</button>
+        <div class="dropdown-options-menu">
+          <a class="dropdown-item" href="${dataUri}" download="Laporan_Kaizen_${(item.nama || 'Foto').replace(/\s/g, '_')}.jpg" style="text-decoration:none;">
+            📥 Download Foto
+          </a>
+          <button class="dropdown-item danger" onclick="hapusLaporan('${item.id}')">
+            🗑️ Hapus Postingan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="post-detail-media" onclick="openFullscreenModal('${dataUri}', ${isImage})">
+      ${isImage ? `<img src="${dataUri}" title="Klik untuk Fullscreen Preview">` : `<div style="padding:40px; color:var(--ig-text);">📄 ${item.fileName || 'Dokumen'}</div>`}
+    </div>
+
+    <div style="padding:14px 18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <button type="button" class="btn-like" onclick="tambahLike('${item.id}')" style="font-size:20px;">
+          ❤️ <span id="modal-like-count-${item.id}" style="font-size:13px; font-weight:800; color:var(--ig-text);">${likesCount}</span>
+        </button>
+        <div style="font-size:12px; font-weight:700; color:var(--ig-secondary-text); display:flex; align-items:center; gap:4px;">
+          👁️ <span id="modal-view-count-${item.id}">${viewsCount}</span> Tayangan
+        </div>
+      </div>
+
+      <div style="font-size:13px; margin-bottom:8px; line-height:1.5;">
+        <span style="font-weight:800; margin-right:6px; color:${opColor};">${item.nama || 'Pelaksana'}</span>
+        ${item.judul ? `<b>${item.judul}</b>` : 'Laporan Kaizen'}
+      </div>
+      
+      ${item.deskripsiSebelum ? `
+        <div style="background:rgba(239, 68, 68, 0.1); border-left:3px solid var(--ig-red); padding:8px 12px; border-radius:4px; margin-bottom:8px; font-size:12px;">
+          <b>Kondisi Sebelum:</b><br>${item.deskripsiSebelum}
+        </div>
+      ` : ''}
+
+      ${item.deskripsiSetelah ? `
+        <div style="background:rgba(16, 185, 129, 0.1); border-left:3px solid var(--ig-green); padding:8px 12px; border-radius:4px; margin-bottom:8px; font-size:12px;">
+          <b>Kondisi Setelah:</b><br>${item.deskripsiSetelah}
+        </div>
+      ` : ''}
+
+      <div style="font-size:10px; color:var(--ig-secondary-text); text-transform:uppercase; font-weight:700; margin-top:6px;">${tgl}</div>
+    </div>
+
+    <div class="comments-container">
+      <div class="comments-list" id="modal-comments-${item.id}">
+        ${commentsHTML || '<div style="font-size:11px; color:var(--ig-secondary-text);">Belum ada komentar...</div>'}
+      </div>
+      <form class="comment-form" onsubmit="tambahKomentar(event, '${item.id}')">
+        <input type="text" class="comment-input-user" id="c-user-${item.id}" placeholder="Nama..." required>
+        <input type="text" class="comment-input-text" id="c-text-${item.id}" placeholder="Tulis komentar..." required>
+        <button type="submit" class="comment-btn-submit">Kirim</button>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('active');
+  content.scrollTop = 0;
+}
+
+function closeDetailModal() {
+  window.activeDetailPostId = null;
+  document.getElementById('detailModal').classList.remove('active');
+}
+
+/* FULLSCREEN PREVIEW (GAMBAR / VIDEO) */
+let scale = 1, lastScale = 1, startDistance = 0, posX = 0, posY = 0, startX = 0, startY = 0, isDragging = false;
+
+function resetZoom() {
+  scale = 1; lastScale = 1; posX = 0; posY = 0;
+  const img = document.getElementById('fullscreenImg');
+  if (img) img.style.transform = `translate(0px, 0px) scale(1)`;
+}
+
+function openFullscreenModal(mediaSrc, isImage = true) {
+  if (!mediaSrc || mediaSrc === '#') return;
+  const fsModal = document.getElementById('fullscreenModal');
+  const fsImg = document.getElementById('fullscreenImg');
+  const fsVideo = document.getElementById('fullscreenVideo');
+
+  if (isImage) {
+    fsImg.src = mediaSrc;
+    fsImg.style.display = 'block';
+    fsVideo.style.display = 'none';
+    fsVideo.pause();
+    fsVideo.src = '';
+    resetZoom();
+  } else {
+    fsImg.style.display = 'none';
+    fsImg.src = '';
+    fsVideo.src = mediaSrc;
+    fsVideo.style.display = 'block';
+    fsVideo.play().catch(e => console.log('Autoplay blocked or error:', e));
+  }
+
+  fsModal.classList.add('active');
+}
+
+function closeFullscreenModal() {
+  const fsVideo = document.getElementById('fullscreenVideo');
+  fsVideo.pause();
+  fsVideo.src = '';
+  document.getElementById('fullscreenModal').classList.remove('active');
+  resetZoom();
+}
+
+function initPinchToZoom() {
+  const container = document.getElementById('fullscreenImgWrapper');
+  const img = document.getElementById('fullscreenImg');
+  if (!container || !img) return;
+
+  function getDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  container.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      startDistance = getDistance(e.touches);
+      lastScale = scale;
+    } else if (e.touches.length === 1 && scale > 1) {
+      isDragging = true;
+      startX = e.touches[0].clientX - posX;
+      startY = e.touches[0].clientY - posY;
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const currentDistance = getDistance(e.touches);
+      if (startDistance > 0) {
+        const factor = currentDistance / startDistance;
+        scale = Math.min(Math.max(1, lastScale * factor), 4);
+        img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+      }
+    } else if (e.touches.length === 1 && isDragging && scale > 1) {
+      e.preventDefault();
+      posX = e.touches[0].clientX - startX;
+      posY = e.touches[0].clientY - startY;
+      img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) startDistance = 0;
+    if (e.touches.length === 0) {
+      isDragging = false;
+      if (scale <= 1) resetZoom();
+    }
+  });
+}
+
+async function tambahKomentar(e, postId) {
+  e.preventDefault();
+  const userInput = document.getElementById(`c-user-${postId}`);
+  const textInput = document.getElementById(`c-text-${postId}`);
+  const user = userInput.value.trim();
+  const text = textInput.value.trim();
+
+  if (!user || !text) return;
+
+  try {
+    await db.ref(`laporan/${postId}/comments`).push({ user, text, timestamp: Date.now() });
+    textInput.value = '';
+    const commentList = document.getElementById(`modal-comments-${postId}`);
+    const cColor = getOperatorColor(user);
+    const newCommentNode = document.createElement('div');
+    newCommentNode.className = 'comment-item';
+    newCommentNode.innerHTML = `<span class="comment-user" style="color:${cColor};">${user}:</span>${text}`;
+    commentList.appendChild(newCommentNode);
+  } catch (err) {
+    showCustomAlert({ icon: '❌', title: 'Gagal', message: err.message, confirmText: 'Tutup', isDanger: true });
+  }
+}
+
+async function hapusLaporan(id) {
+  showCustomAlert({
+    icon: '🗑️',
+    title: 'Hapus Postingan',
+    message: 'Apakah Anda yakin ingin menghapus laporan/postingan ini dari server?',
+    isDanger: true,
+    confirmText: 'Hapus',
+    callback: async (isConfirm) => {
+      if (isConfirm) {
+        try {
+          await db.ref('laporan/' + id).remove();
+          closeDetailModal();
+          triggerSuccessAnimation("Postingan Berhasil Dihapus!");
+        } catch (err) {
+          showCustomAlert({ icon: '❌', title: 'Gagal Hapus', message: err.message, isDanger: true });
+        }
+      }
+    }
+  });
+}
+
+/* NAVIGASI MENU ADMIN & PIN */
+function verifikasiAdminPin() {
+  const pin = document.getElementById('adminPinInput').value;
+  if (pin === "1234") {
+    document.getElementById('adminAuthBox').style.display = 'none';
+    document.getElementById('adminContentBox').style.display = 'block';
+  } else {
+    showCustomAlert({ icon: '🔒', title: 'Akses Ditolak', message: 'PIN Khusus Admin yang Anda masukkan salah!', isDanger: true, confirmText: 'Coba Lagi' });
+  }
+}
+
+function bukaSubPengaturan(panelId) {
+  document.getElementById('settingsMenuHub').style.display = 'none';
+  document.querySelectorAll('.settings-detail-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+
+function kembaliKeHubSettings() {
+  document.querySelectorAll('.settings-detail-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('settingsMenuHub').style.display = 'grid';
+}
+
+/* ADMIN 1: DOWNLOAD ALL */
+async function adminDownloadSemuaFoto() {
+  if (semuaLaporanExplore.length === 0) {
+    showCustomAlert({ icon: '📦', title: 'Data Kosong', message: 'Tidak ada foto/laporan untuk diunduh saat ini.', confirmText: 'Tutup' });
+    return;
+  }
+  
+  showCustomAlert({
+    icon: '📥',
+    title: 'Download Massal',
+    message: `Anda akan mengunduh ${semuaLaporanExplore.length} berkas foto sekaligus ke galeri perangkat Anda. Lanjutkan?`,
+    confirmText: 'Mulai Download',
+    callback: async (isConfirm) => {
+      if (!isConfirm) return;
+
+      let downloadedCount = 0;
+      for (let i = 0; i < semuaLaporanExplore.length; i++) {
+        const item = semuaLaporanExplore[i];
+        if (item.fileData) {
+          const dataUri = `data:${item.mimeType};base64,${item.fileData}`;
+          const link = document.createElement('a');
+          link.href = dataUri;
+          link.download = item.fileName || `Laporan_${item.nama || 'Foto'}_${i+1}.jpg`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          downloadedCount++;
+          await new Promise(res => setTimeout(res, 400));
+        }
+      }
+      triggerSuccessAnimation(`Berhasil mengunduh ${downloadedCount} foto!`);
+    }
+  });
+}
+
+/* ADMIN 2: DELETE ALL */
+async function adminHapusSemuaFoto() {
+  showCustomAlert({
+    icon: '⚠️',
+    title: 'HAPUS SELURUH DATABASE',
+    message: 'Tindakan ini akan MENGHAPUS SEMUA LAPORAN secara permanen! Ketik kata "HAPUS" di bawah untuk mengonfirmasi:',
+    isDanger: true,
+    needInput: true,
+    inputPlaceholder: 'Ketik HAPUS...',
+    confirmText: 'Hapus Semua Data',
+    callback: async (isConfirm, inputText) => {
+      if (isConfirm) {
+        if (inputText === "HAPUS") {
+          try {
+            await db.ref('laporan').remove();
+            triggerSuccessAnimation("Seluruh Database Berhasil Dihapus!");
+          } catch (err) {
+            showCustomAlert({ icon: '❌', title: 'Gagal Hapus', message: err.message, isDanger: true });
+          }
+        } else {
+          showCustomAlert({ icon: '🔒', title: 'Dibatalkan', message: 'Kata kunci konfirmasi salah. Tindakan dibatalkan.', isDanger: true, confirmText: 'Tutup' });
+        }
+      }
+    }
+  });
+}
+
+/* ADMIN 3: TEMA UI DYNAMIC (GLOBAL SYNCHRONIZATION) */
+function konfirmasiGantiTema(themeClass) {
+  showCustomAlert({
+    icon: '🎮',
+    title: 'Ganti Tema UI Animasi Global',
+    message: 'Terapkan tema animasi bergerak ini ke SELURUH PERANGKAT PENGGUNA secara realtime?',
+    confirmText: 'Terapkan Ke Semua Perangkat',
+    callback: async (isConfirm) => {
+      if (isConfirm) {
+        try {
+          await db.ref('app_config/theme').set(themeClass);
+          triggerSuccessAnimation("Tema Berhasil Diubah di Seluruh Perangkat!");
+        } catch (err) {
+          showCustomAlert({ icon: '❌', title: 'Gagal', message: err.message, isDanger: true });
+        }
+      }
+    }
+  });
+}
+
+/* ADMIN 4: BANNER GAMBAR & VIDEO */
+function fileToBase64DataUri(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = err => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function tambahBannerAdmin() {
+  const fileInput = document.getElementById('adminBannerFile');
+  const bannerText = document.getElementById('adminBannerText').value.trim();
+
+  if (fileInput.files.length === 0 && !bannerText) {
+    showCustomAlert({ icon: '📢', title: 'Data Kosong', message: 'Harap pilih file Gambar/Video atau isi teks pengumuman!', confirmText: 'Mengerti' });
+    return;
+  }
+
+  showCustomAlert({
+    icon: '📢',
+    title: 'Publikasi Banner',
+    message: 'Tambahkan banner pengumuman ini ke halaman Home?',
+    confirmText: 'Publis Banner',
+    callback: async (isConfirm) => {
+      if (!isConfirm) return;
+      try {
+        let mediaUri = "";
+        let mediaType = "image";
+
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+          
+          if (file.size > 18 * 1024 * 1024) {
+            showCustomAlert({ icon: '⚠️', title: 'File Terlalu Besar', message: 'Ukuran video maksimal adalah 18MB.' });
+            return;
+          }
+
+          mediaUri = await fileToBase64DataUri(file);
+        }
+
+        await db.ref('app_config/banners').push().set({
+          mediaUri: mediaUri,
+          mediaType: mediaType,
+          text: bannerText,
+          likes: 0,
+          timestamp: Date.now()
+        });
+
+        document.getElementById('adminBannerFile').value = '';
+        document.getElementById('adminBannerText').value = '';
+        triggerSuccessAnimation("Banner Pengumuman Baru Ditambahkan!");
+      } catch (err) {
+        showCustomAlert({ icon: '❌', title: 'Gagal Banner', message: err.message, isDanger: true });
+      }
+    }
+  });
+}
+
+/* RENDERING BANNER SEAMLESS DENGAN TITIK TIGA OPTIONS & FULLSCREEN KLIK */
+let currentBannerKeys = [];
+
+function muatBannersHome() {
+  db.ref('app_config/banners').on('value', snapshot => {
+    const container = document.getElementById('homeBannerContainer');
+    const adminList = document.getElementById('adminBannerList');
+    
+    if (!container) return;
+
+    if (!snapshot.exists()) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      currentBannerKeys = [];
+      if (adminList) adminList.innerHTML = '<div style="font-size:11px; color:var(--ig-secondary-text);">Belum ada banner aktif saat ini.</div>';
+      return;
+    }
+
+    container.style.display = 'flex';
+    const newKeys = Object.keys(snapshot.val());
+
+    const isStructureChanged = newKeys.length !== currentBannerKeys.length || !newKeys.every((k, i) => k === currentBannerKeys[i]);
+
+    if (isStructureChanged) {
+      currentBannerKeys = newKeys;
+      let htmlHome = '';
+      let htmlAdmin = '';
+
+      snapshot.forEach(child => {
+        const key = child.key;
+        const b = child.val();
+
+        const mediaSrc = b.mediaUri || b.imageUri || "";
+        const isVideo = b.mediaType === 'video' || mediaSrc.startsWith('data:video/');
+        const likesCount = b.likes || 0;
+
+        if (mediaSrc || b.text) {
+          htmlHome += `
+            <div class="announcement-card" id="banner-card-${key}">
+              <div class="announcement-media-wrapper">
+                ${mediaSrc ? (
+                  isVideo 
+                    ? `<video id="video-banner-${key}" src="${mediaSrc}" autoplay loop muted playsinline onclick="openFullscreenModal('${mediaSrc}', false)"></video>`
+                    : `<img src="${mediaSrc}" alt="Banner Pengumuman" onclick="openFullscreenModal('${mediaSrc}', true)">`
+                ) : ''}
+                
+                ${mediaSrc ? `
+                  <div style="position: absolute; top: 12px; right: 14px; z-index: 10;" class="menu-options-wrapper">
+                    <button class="btn-menu-options" onclick="toggleOptionsMenu(event)" title="Opsi Banner">⋮</button>
+                    <div class="dropdown-options-menu">
+                      <a class="dropdown-item" href="${mediaSrc}" download="Banner_Kaizen_${key}.${isVideo ? 'mp4' : 'jpg'}" style="text-decoration:none;">
+                        📥 Download ${isVideo ? 'Video' : 'Gambar'}
+                      </a>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div class="announcement-text-box">
+                <div>📢 ${b.text || 'Pengumuman Kaizen'}</div>
+                <button type="button" class="btn-like" onclick="tambahLikeBanner('${key}', event)" title="Suka Banner">
+                  ❤️ <span id="banner-like-count-${key}" style="font-size:12px; color:var(--ig-text);">${likesCount}</span>
+                </button>
+              </div>
+
+              ${isVideo ? `
+                <div class="banner-controls-bar">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:11px; font-weight:800; color:var(--ig-secondary-text);">Kecepatan:</span>
+                    <select class="banner-speed-select" onchange="ubahKecepatanVideoBanner(document.getElementById('video-banner-${key}'), this.value)">
+                      <option value="0.5">0.5x</option>
+                      <option value="1.0" selected>1.0x (Normal)</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                      <option value="2.0">2.0x</option>
+                    </select>
+                  </div>
+                </div>
+              ` : ''}
+            </div>`;
+          
+          htmlAdmin += `
+            <div style="display:flex; align-items:center; justify-content:space-between; background:var(--ig-bg); padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--ig-border);">
+              <div style="display:flex; align-items:center; gap:10px;">
+                ${mediaSrc ? (
+                  isVideo 
+                    ? `<span style="font-size:20px;">🎬</span>`
+                    : `<img src="${mediaSrc}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">`
+                ) : '📢'}
+                <span style="font-size:12px; font-weight:700;">${b.text || (isVideo ? 'Banner Video' : 'Banner Gambar')}</span>
+              </div>
+              <button class="ig-btn ig-btn-danger" style="width:auto; padding:6px 12px; font-size:11px;" onclick="hapusBannerSpesifik('${key}')">Hapus</button>
+            </div>`;
+        }
+      });
+
+      container.innerHTML = htmlHome;
+      if (adminList) adminList.innerHTML = htmlAdmin;
+    } else {
+      snapshot.forEach(child => {
+        const key = child.key;
+        const b = child.val();
+        const countSpan = document.getElementById(`banner-like-count-${key}`);
+        if (countSpan) {
+          countSpan.textContent = b.likes || 0;
+        }
+      });
+    }
+  });
+}
+
+async function hapusBannerSpesifik(key) {
+  showCustomAlert({
+    icon: '🗑️',
+    title: 'Hapus Banner',
+    message: 'Apakah Anda yakin ingin menghapus banner ini dari halaman Home?',
+    isDanger: true,
+    confirmText: 'Hapus',
+    callback: async (isConfirm) => {
+      if (isConfirm) {
+        await db.ref(`app_config/banners/${key}`).remove();
+        triggerSuccessAnimation("Banner Berhasil Dihapus!");
+      }
+    }
+  });
+}
+
+/* ADMIN 5: GANTI FONT (GLOBAL SYNCHRONIZATION) */
+function konfirmasiGantiFontSelect(val) {
+  showCustomAlert({
+    icon: '🔤',
+    title: 'Ganti Font Aplikasi Global',
+    message: 'Terapkan gaya jenis font ini ke SELURUH PERANGKAT PENGGUNA secara realtime?',
+    confirmText: 'Ganti Font Ke Semua Perangkat',
+    callback: async (isConfirm) => {
+      if (isConfirm) {
+        try {
+          await db.ref('app_config/font').set(val);
+          triggerSuccessAnimation("Font Berhasil Diubah di Seluruh Perangkat!");
+        } catch (err) {
+          showCustomAlert({ icon: '❌', title: 'Gagal', message: err.message, isDanger: true });
+        }
+      }
+    }
+  });
+}
+
+function konfirmasiGantiFontKustom() {
+  const customFont = document.getElementById('adminCustomFontInput').value.trim();
+  if (!customFont) {
+    showCustomAlert({ icon: '🔤', title: 'Data Kosong', message: 'Ketik nama jenis font CSS kustom terlebih dahulu!', confirmText: 'Mengerti' });
+    return;
+  }
+  
+  showCustomAlert({
+    icon: '🔤',
+    title: 'Ganti Font Kustom Global',
+    message: `Ganti font aplikasi menjadi "${customFont}" untuk SELURUH PERANGKAT PENGGUNA?`,
+    confirmText: 'Terapkan Ke Semua Perangkat',
+    callback: async (isConfirm) => {
+      if (isConfirm) {
+        try {
+          await db.ref('app_config/font').set(customFont);
+          triggerSuccessAnimation("Font Kustom Berhasil Diubah di Seluruh Perangkat!");
+        } catch (err) {
+          showCustomAlert({ icon: '❌', title: 'Gagal', message: err.message, isDanger: true });
+        }
+      }
+    }
+  });
+}
+
+/* EXPORT CANVAS JPG KAIZEN */
+const LOGO_URL = "https://res.cloudinary.com/vf5nikiz/image/upload/v1785164146/IMG_20260707_085722_slsyiz.jpg";
+let cachedLogoImg = null;
+
+function loadLogoImage() {
+  return new Promise(resolve => {
+    if (cachedLogoImg) { resolve(cachedLogoImg); return; }
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => { cachedLogoImg = img; resolve(img); };
+    img.onerror = () => {
+      const fallbackImg = new Image();
+      fallbackImg.onload = () => resolve(fallbackImg);
+      fallbackImg.onerror = () => resolve(null);
+      fallbackImg.src = LOGO_URL;
+    };
+    img.src = LOGO_URL;
+  });
+}
+
+function breakOversizedWord(ctx, word, maxWidth) {
+  if (ctx.measureText(word).width <= maxWidth) return [word];
+  const chunks = [];
+  let chunk = '';
+  for (const ch of word) {
+    const test = chunk + ch;
+    if (ctx.measureText(test).width > maxWidth && chunk) {
+      chunks.push(chunk); chunk = ch;
+    } else chunk = test;
+  }
+  if (chunk) chunks.push(chunk);
+  return chunks;
+}
+
+function getWrappedLines(ctx, text, font, maxWidth) {
+  ctx.font = font;
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (ctx.measureText(word).width > maxWidth) {
+      if (line) { lines.push(line); line = ''; }
+      const pieces = breakOversizedWord(ctx, word, maxWidth);
+      pieces.forEach((piece, idx) => {
+        if (idx < pieces.length - 1) lines.push(piece);
+        else line = piece;
+      });
+      continue;
+    }
+    const testLine = line ? line + ' ' + word : word;
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      lines.push(line); line = word;
+    } else line = testLine;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function fitTitleBlock(ctx, text, maxWidth, maxHeight, maxLines, maxFont, minFont) {
+  for (let size = maxFont; size >= minFont; size -= 2) {
+    const font = `bold ${size}px Arial`;
+    const lines = getWrappedLines(ctx, text, font, maxWidth);
+    const lineHeight = size * 1.18;
+    if (lines.length <= maxLines && lines.length * lineHeight <= maxHeight) {
+      return { font, size, lines, lineHeight };
+    }
+  }
+  const font = `bold ${minFont}px Arial`;
+  let lines = getWrappedLines(ctx, text, font, maxWidth);
+  const lineHeight = minFont * 1.18;
+  if (lines.length > maxLines) {
+    lines = lines.slice(0, maxLines);
+    ctx.font = font;
+    let last = lines[maxLines - 1];
+    while (ctx.measureText(last + '…').width > maxWidth && last.length > 1) {
+      last = last.slice(0, -1);
+    }
+    lines[maxLines - 1] = last + '…';
+  }
+  return { font, size: minFont, lines, lineHeight };
+}
+
+async function simpanLaporanLengkap() {
+  const nama      = document.getElementById('nama').value.trim()    || "-";
+  const dept      = document.getElementById('dept').value.trim()    || "-";
+  const area      = document.getElementById('area').value.trim()    || "-";
+  const tanggal   = document.getElementById('tanggal').value || "-";
+  const week      = document.getElementById('week').value    || "-";
+  const desBefore = document.getElementById('deskripsi').value.trim() || "-";
+  const desAfter  = document.getElementById('perbaikan').value.trim()  || "-";
+
+  if (nama === "-" || dept === "-") {
+    showCustomAlert({ icon: '⚠️', title: 'Data Belum Lengkap', message: 'Harap isi Nama Pelaksana dan Judul Kaizen!', confirmText: 'Mengerti' });
+    return;
+  }
+
+  const btn = document.getElementById("btnGenerateJpg");
+  const originalBtnText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="mini-spinner"></span> Sedang Menyimpan Laporan...`;
+
+  try {
+    const W = 2480, H = 1754;
+    const canvas = document.getElementById('exportCanvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    const C = { white: '#ffffff', dark: '#0f172a', red: '#dc2626', green: '#16a34a' };
+
+    ctx.fillStyle = C.white;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(16, 16, W-32, H-32);
+
+    const hdrH = 260;
+    const rightBlockW = 420;
+    const brandColW = 260;
+    const leftBlockW = W - 32 - rightBlockW;
+    const titleColX = 16 + brandColW;
+    const titleColW = leftBlockW - brandColW;
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(16, 16, brandColW, hdrH);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(16, 16, brandColW, hdrH);
+
+    const logoImg = await loadLogoImage();
+    const maxLogoW = brandColW - 30;
+    const maxLogoH = 110; 
+
+    if (logoImg) {
+      const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
+      const iw = logoImg.width * ratio;
+      const ih = logoImg.height * ratio;
+      const ix = 16 + (brandColW - iw) / 2;
+      const iy = 16 + 12 + (maxLogoH - ih) / 2;
+      try {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(logoImg, ix, iy, iw, ih);
+      } catch (e) {}
+    }
+
+    const lineY = 16 + 145;
+    ctx.beginPath();
+    ctx.moveTo(16, lineY);
+    ctx.lineTo(16 + brandColW, lineY);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = C.dark;
+    ctx.font = 'bold 22px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('LAPORAN KASIH', 16 + brandColW / 2, 16 + 200);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(titleColX, 16, titleColW, hdrH);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(titleColX, 16, titleColW, hdrH);
+
+    const titlePad = 40;
+    const titleMaxWidth = titleColW - titlePad * 2;
+    const titleZoneH = hdrH - titlePad * 2;
+
+    const fit = fitTitleBlock(ctx, dept, titleMaxWidth, titleZoneH, 3, 64, 22);
+    ctx.fillStyle = C.dark;
+    ctx.font = fit.font;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const blockH = fit.lines.length * fit.lineHeight;
+    let ly = 16 + hdrH / 2 - blockH / 2 + fit.lineHeight / 2;
+    fit.lines.forEach(line => {
+      ctx.fillText(line, titleColX + titleColW / 2, ly);
+      ly += fit.lineHeight;
+    });
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    const rightBlockX = W - 16 - rightBlockW;
+    const infoRowH = hdrH / 4;
+    const infoLabels = [
+      ['Disusun', nama], ['Tanggal', tanggal], ['Area', area], ['Week', week],
+    ];
+    infoLabels.forEach(([label, value], i) => {
+      const ry = 16 + i * infoRowH;
+      ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#f1f5f9';
+      ctx.fillRect(rightBlockX, ry, rightBlockW, infoRowH);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(rightBlockX, ry, rightBlockW, infoRowH);
+      
+      ctx.fillStyle = i === 0 ? getOperatorColor(nama) : C.dark;
+      ctx.font = 'bold 22px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, rightBlockX + rightBlockW / 2, ry + infoRowH * 0.32);
+      ctx.font = 'bold 22px Arial';
+      ctx.fillText(value, rightBlockX + rightBlockW / 2, ry + infoRowH * 0.68);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+    });
+
+    const colHdrY = 16 + hdrH;
+    const colHdrH = 80;
+    const halfW = (W - 32) / 2;
+
+    ctx.fillStyle = C.red;
+    ctx.fillRect(16, colHdrY, halfW, colHdrH);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 42px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('KONDISI SEBELUM KASIH', 16 + halfW / 2, colHdrY + colHdrH / 2);
+
+    ctx.fillStyle = C.green;
+    ctx.fillRect(16 + halfW, colHdrY, halfW, colHdrH);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('KONDISI SETELAH KASIH', 16 + halfW + halfW / 2, colHdrY + colHdrH / 2);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    const photoY = colHdrY + colHdrH;
+    const descH = 220;
+    const photoH = H - 16 - photoY - descH;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(16, photoY, halfW, photoH);
+    ctx.fillRect(16 + halfW, photoY, halfW, photoH);
+
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(16, photoY, halfW, photoH);
+    ctx.strokeRect(16 + halfW, photoY, halfW, photoH);
+
+    const pad = 20;
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(16 + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+    ctx.strokeRect(16 + halfW + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+
+    await drawPhotoOnCanvas(ctx, 'fotoSebelum', 16 + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+    await drawPhotoOnCanvas(ctx, 'fotoSesudah', 16 + halfW + pad, photoY + pad, halfW - pad*2, photoH - pad*2);
+
+    const descY = photoY + photoH;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(16, descY, halfW, descH);
+    ctx.fillRect(16 + halfW, descY, halfW, descH);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(16, descY, halfW, descH);
+    ctx.strokeRect(16 + halfW, descY, halfW, descH);
+
+    ctx.fillStyle = C.dark;
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('Penjelasan Kondisi Sebelum:', 40, descY + 45);
+    ctx.fillText('Penjelasan Kondisi Setelah:', 40 + halfW, descY + 45);
+
+    ctx.fillStyle = C.dark;
+    ctx.font = '30px Arial';
+    wrapText(ctx, desBefore, 40, descY + 90, halfW - 70, 42);
+    wrapText(ctx, desAfter, 40 + halfW, descY + 90, halfW - 70, 42);
+
+    const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.98);
+    const base64Foto = jpgDataUrl.split(',')[1];
+
+    const payload = {
+      nama, area, week: Number(week),
+      judul: dept,
+      deskripsiSebelum: desBefore,
+      deskripsiSetelah: desAfter,
+      fileName: `Laporan_Kaizen_Week_${week}_${nama.replace(/\s/g,'_')}.jpg`,
+      mimeType: 'image/jpeg',
+      fileData: base64Foto,
+      likes: 0,
+      views: 0,
+      tanggal: tanggal || new Date().toISOString(),
+      timestamp: Date.now()
+    };
+
+    await db.ref('laporan').push().set(payload);
+    triggerSuccessAnimation();
+
+    document.getElementById('nama').value = "";
+    document.getElementById('dept').value = "";
+    document.getElementById('area').value = "";
+    document.getElementById('deskripsi').value = "";
+    document.getElementById('perbaikan').value = "";
+    clearImage('fotoSebelum', 'pre-sebelum', 'btn-del-before');
+    clearImage('fotoSesudah', 'pre-sesudah', 'btn-del-after');
+    isiWeekOtomatis();
+
+    tampilkanForm('menuUtama');
+  } catch (err) {
+    showCustomAlert({ icon: '❌', title: 'Gagal Simpan', message: err.message, confirmText: 'Tutup', isDanger: true });
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnText;
+  }
+}
+
+function drawPhotoOnCanvas(ctx, inputId, x, y, maxW, maxH) {
+  return new Promise(resolve => {
+    const file = document.getElementById(inputId).files[0];
+    if (!file) {
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fillRect(x, y, maxW, maxH);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 44px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('[ BELUM ADA FOTO ]', x + maxW / 2, y + maxH / 2);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      resolve();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(maxW / img.width, maxH / img.height);
+        const w = img.width * ratio;
+        const h = img.height * ratio;
+        const ox = x + (maxW - w) / 2;
+        const oy = y + (maxH - h) / 2;
+        ctx.drawImage(img, ox, oy, w, h);
+        resolve();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let cy = y;
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && i > 0) {
+      ctx.fillText(line, x, cy);
+      line = words[i] + ' ';
+      cy += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, cy);
+}
+</script>
+
+</body>
+</html>
